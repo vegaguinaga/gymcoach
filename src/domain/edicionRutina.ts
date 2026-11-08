@@ -1,7 +1,8 @@
 // Edición manual de la rutina (rutinas propias).
 // Regla: los cambios en un día se aplican a todos los días que se llaman igual
 // (ej. «Full Body A» se repite en los días 1 y 3), igual que «Cambiar» ejercicio.
-// No se agregan ni quitan días: así «qué día toca» sigue funcionando.
+// Los días se pueden agregar (copia de otro, al final) y quitar; «qué día toca» sigue
+// funcionando porque avanza en ciclo, y el historial no cambia (cada sesión guarda su copia del día).
 import { NO_PRESCRIBIBLES, prescripcion } from './generador'
 import type { DiaRutina, EjercicioPlanificado, Exercise, Routine } from './tipos'
 
@@ -12,6 +13,7 @@ export const LIMITES = {
   descansoSeg: { min: 30, max: 300, paso: 15 },
 } as const
 export const MAX_NOMBRE = 30
+export const MAX_DIAS = 7
 
 const limitar = (n: number, min: number, max: number) => Math.min(max, Math.max(min, Math.round(n)))
 
@@ -109,4 +111,21 @@ export function renombrarRutina(rutina: Routine, nombre: string): Routine {
   const limpio = normalizarNombre(nombre)
   if (!limpio || limpio === rutina.nombre) return rutina
   return { ...rutina, nombre: limpio, personalizada: true }
+}
+
+/**
+ * Agrega al final una copia del día indicado (máximo 7 días). Conserva el nombre,
+ * así que cambia junto a su original hasta que se renombre.
+ */
+export function agregarDia(rutina: Routine, copiaDe: number): Routine {
+  const dia = rutina.dias[copiaDe]
+  if (!dia || rutina.dias.length >= MAX_DIAS) return rutina
+  const copia: DiaRutina = { ...dia, ejercicios: dia.ejercicios.map((e) => ({ ...e })) }
+  return { ...rutina, personalizada: true, dias: [...rutina.dias, copia] }
+}
+
+/** Quita un día de la rutina. Siempre queda al menos uno. */
+export function quitarDia(rutina: Routine, diaIndice: number): Routine {
+  if (!rutina.dias[diaIndice] || rutina.dias.length <= 1) return rutina
+  return { ...rutina, personalizada: true, dias: rutina.dias.filter((_, i) => i !== diaIndice) }
 }

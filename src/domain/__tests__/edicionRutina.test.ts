@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
+  agregarDia,
   agregarEjercicio,
   editarPrescripcion,
   moverEjercicio,
   normalizarPrescripcion,
+  quitarDia,
   quitarEjercicio,
   renombrarDia,
   renombrarRutina,
@@ -109,5 +111,32 @@ describe('renombrar', () => {
     expect(renombrarDia(rutina, 0, '   ')).toBe(rutina)
     expect(renombrarRutina(rutina, 'x'.repeat(40)).nombre).toHaveLength(30)
     expect(renombrarRutina(rutina, 'Full Body')).toBe(rutina)
+  })
+})
+
+describe('agregarDia / quitarDia', () => {
+  it('agrega al final una copia independiente del día elegido', () => {
+    const r = agregarDia(rutina, 1)
+    expect(r.dias.map((d) => d.nombre)).toEqual(['Full Body A', 'Full Body B', 'Full Body A', 'Full Body B'])
+    expect(ids(r, 3)).toEqual(['D', 'E'])
+    expect(r.personalizada).toBe(true)
+    r.dias[3].ejercicios[0].series = 6
+    expect(rutina.dias[1].ejercicios[0].series).toBe(3)
+  })
+  it('la copia cambia junto a su original (mismo nombre)', () => {
+    const r = editarPrescripcion(agregarDia(rutina, 1), 3, 0, { series: 5 })
+    expect(r.dias[1].ejercicios[0].series).toBe(5)
+  })
+  it('máximo 7 días y día inexistente no cambia nada', () => {
+    let r = rutina
+    for (let i = 0; i < 10; i++) r = agregarDia(r, 0)
+    expect(r.dias).toHaveLength(7)
+    expect(agregarDia(rutina, 9)).toBe(rutina)
+  })
+  it('quita el día indicado y siempre deja uno', () => {
+    expect(quitarDia(rutina, 1).dias.map((d) => d.nombre)).toEqual(['Full Body A', 'Full Body A'])
+    const uno = { ...rutina, dias: [rutina.dias[0]] }
+    expect(quitarDia(uno, 0)).toBe(uno)
+    expect(quitarDia(rutina, 5)).toBe(rutina)
   })
 })

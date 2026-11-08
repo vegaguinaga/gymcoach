@@ -3,7 +3,7 @@ import { useEjercicios } from '../../data/repos/ejercicios'
 import { usePerfil } from '../../data/repos/perfil'
 import { actualizarRutina, guardarRutina, useRutinaActual } from '../../data/repos/rutinas'
 import { cambiarEjercicio, diasEfectivos, generarRutina, minutosEstimados, opcionesDeCambio } from '../../domain/generador'
-import { renombrarRutina } from '../../domain/edicionRutina'
+import { MAX_DIAS, agregarDia, quitarDia, renombrarRutina } from '../../domain/edicionRutina'
 import type { DiaRutina, EjercicioPlanificado, Equipo, Exercise, Routine } from '../../domain/tipos'
 import { AvisoSeguridad } from '../../ui/AvisoSeguridad'
 import { OpcionesCambio } from '../../ui/OpcionesCambio'
@@ -116,7 +116,7 @@ export function PantallaRutina() {
             <AvisoSeguridad compuesto />
             {rutina.dias.map((dia, i) => (
               <TarjetaDia
-                key={i}
+                key={`${i}-${dia.nombre}`}
                 numero={i + 1}
                 dia={dia}
                 rutina={rutina}
@@ -126,10 +126,48 @@ export function PantallaRutina() {
                 alCambiar={(pos, nuevo) => actualizarRutina({ ...cambiarEjercicio(rutina, i, pos, nuevo), personalizada: true })}
               />
             ))}
+            <AgregarDia rutina={rutina} />
           </>
         )}
       </div>
     </Pantalla>
+  )
+}
+
+/** «Añadir día»: copia de un día existente, al final de la rutina (máximo 7). */
+function AgregarDia({ rutina }: { rutina: Routine }) {
+  const [copiaDe, setCopiaDe] = useState(0)
+  if (rutina.dias.length >= MAX_DIAS)
+    return <p className="text-center text-sm text-neutral-500">La rutina ya tiene {MAX_DIAS} días, el máximo.</p>
+  const origen = Math.min(copiaDe, rutina.dias.length - 1)
+  return (
+    <section className="flex flex-col gap-2 rounded-xl border border-dashed border-neutral-700 p-4" aria-labelledby="titulo-agregar-dia">
+      <h2 id="titulo-agregar-dia" className="font-semibold">
+        Añadir un día
+      </h2>
+      <label className="flex flex-col gap-1 text-sm text-neutral-300">
+        Copia de
+        <select
+          value={origen}
+          onChange={(e) => setCopiaDe(Number(e.target.value))}
+          className="min-h-12 rounded-lg border border-neutral-700 bg-neutral-950 px-3"
+        >
+          {rutina.dias.map((d, i) => (
+            <option key={i} value={i}>
+              Día {i + 1} · {d.nombre}
+            </option>
+          ))}
+        </select>
+      </label>
+      <p className="text-xs text-neutral-400">Mientras tenga el mismo nombre, cambia junto a su original. Renómbralo para separarlo.</p>
+      <button
+        type="button"
+        onClick={() => void actualizarRutina(agregarDia(rutina, origen))}
+        className="min-h-12 rounded-xl bg-neutral-800 font-semibold"
+      >
+        ➕ Añadir día
+      </button>
+    </section>
   )
 }
 
@@ -169,14 +207,28 @@ function TarjetaDia({ numero, dia, rutina, porId, ejercicios, equipo, alCambiar 
         {editando ? '✓ Listo' : '✏️ Editar día'}
       </button>
       {editando ? (
-        <EditorDia
-          rutina={rutina}
-          diaIndice={numero - 1}
-          porId={porId}
-          ejercicios={ejercicios}
-          equipo={equipo}
-          alGuardar={actualizarRutina}
-        />
+        <>
+          <EditorDia
+            rutina={rutina}
+            diaIndice={numero - 1}
+            porId={porId}
+            ejercicios={ejercicios}
+            equipo={equipo}
+            alGuardar={actualizarRutina}
+          />
+          {rutina.dias.length > 1 && (
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm(`¿Quitar el día ${numero} (${dia.nombre}) de la rutina? Tu historial no se borra.`))
+                  void actualizarRutina(quitarDia(rutina, numero - 1))
+              }}
+              className="mt-3 min-h-11 w-full rounded-lg border border-red-900 text-sm text-red-300 active:bg-red-950"
+            >
+              Quitar este día
+            </button>
+          )}
+        </>
       ) : (
         <ul className="divide-y divide-neutral-800">
           {dia.ejercicios.map((e, pos) => {
