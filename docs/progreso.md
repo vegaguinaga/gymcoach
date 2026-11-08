@@ -1,6 +1,12 @@
 # Progreso de GymCoach
 
-## Estado actual: Fase 7 completada (2026-11-08)
+## Estado actual: Fase 8 completada (2026-11-08)
+- **Editar sesiones terminadas**: `src/domain/edicionSesion.ts` (`normalizarSerie`, `editarSerie`, `hayCambios`; con tests). En el detalle del historial, «✏️ Editar series»: borrador local con kg/reps/RPE/✓, + serie y ×. Se guarda todo junto (`editarSesionTerminada`). Récords y progresión se recalculan solos. `CampoNumero` pasó a `src/ui/`.
+- **Calendario**: `src/domain/calendario.ts` (`mesCalendario` con semanas que empiezan en lunes y hora local, `rachaSemanas`; con tests). Chip «Calendario» en Progreso: mes con ◀ ▶, días entrenados en lima y, al tocar un día, sus sesiones. «🔥 N semanas seguidas»: la semana en curso no rompe la racha. La sección elegida se recuerda en `sessionStorage`.
+- **Rutinas propias**: `src/domain/edicionRutina.ts` (con tests). Se puede editar series 1–6, reps 1–30, RPE 5–10 y descanso 30–300 s (pasos de 15), reordenar ↑↓, quitar (queda al menos 1) y añadir ejercicios (no la plancha ni repetidos), renombrar el día y la rutina. **Los cambios de ejercicios se aplican a todos los días con el mismo nombre**; renombrar un día lo separa de los demás. No se añaden ni quitan días. `Routine.personalizada` (opcional): el aviso al regenerar lo menciona. UI: «✏️ Editar día» en cada tarjeta (`EditorDia.tsx`) y ✏️ junto al nombre.
+- Dexie sigue en **v3**. Build: JS inicial ≈ 126 KB gzip.
+
+## Fase 7 (2026-11-08)
 - **Calentamiento**: `src/domain/calentamiento.ts` (con tests). Solo compuestos con carga: 40 % × 8, 60 % × 5 y 80 % × 3 del peso de la 1.ª serie, redondeado al incremento (`incrementoKg`). Con < 20 kg, 1 serie al 50 %. Desplegable «🔥 Calentamiento» en la tarjeta hasta marcar la primera serie; no se registra.
 - **Notas**: `WorkoutSession.notasEjercicio` (opcional, sin índice: Dexie sigue en **v3**). `src/domain/notas.ts` (`conNotaEjercicio`, `ultimaNota`, con tests). En la tarjeta: «📝 Añadir nota» y «La última vez: …». Nota de la sesión en el resumen (`guardarNotaSesion`, sirve también en sesiones terminadas). Se ven en el detalle del historial.
 - **Recordatorio de copia**: `Profile.ultimaCopia`, que se guarda al exportar y al importar. `guardarPerfil` la conserva (el formulario no la pisa). `necesitaCopia`/`textoUltimaCopia` en `respaldo.ts` (con tests): avisa si nunca hubo copia y hay ≥ 3 sesiones, o si la copia tiene 14+ días y hay sesiones posteriores. Aviso en el selector de día de Entrenar y «Última copia: …» en Tus datos.
@@ -69,8 +75,8 @@
 - Primer test de dominio: `redondearKg` (`src/domain/unidades.ts`).
 - Build: JS inicial ≈ 69 KB gzip.
 
-## Siguiente: Fase 8
-Por definir. Ideas: probar la instalación en iOS/Android y corregir lo que aparezca, editar sesiones ya terminadas, plantillas de rutina propias, vista del calendario de entrenamientos.
+## Siguiente: Fase 9
+Por definir. Pendiente: probar la instalación y las pantallas nuevas en un teléfono real (iOS/Android). Ideas: añadir o quitar días en la rutina, editar la fecha de una sesión, registrar una sesión olvidada a posteriori.
 
 ## Notas
 - Node se instaló con nvm: en shells no interactivos hay que cargar `~/.nvm/nvm.sh` antes de `npm`.
