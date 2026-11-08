@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+
+/* Tema oscuro por defecto: se usa en el gym */
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-neutral-950 text-neutral-100 antialiased;
+  /* Evita el zoom accidental por doble toque en botones */
+  touch-action: manipulation;
+}
