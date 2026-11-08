@@ -1,0 +1,687 @@
+[
+  {
+    "id": "press_banca",
+    "nombre": "Press de banca con barra",
+    "grupoPrincipal": "pecho",
+    "gruposSecundarios": ["triceps", "hombros"],
+    "equipo": "gym",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Acuéstate en el banco con los ojos bajo la barra y los pies firmes en el suelo.",
+      "Agarra la barra algo más ancho que los hombros y junta los omóplatos.",
+      "Baja la barra controlada hasta la parte baja del pecho.",
+      "Empuja hacia arriba hasta estirar los brazos sin despegar la espalda."
+    ],
+    "erroresComunes": ["Rebotar la barra en el pecho", "Abrir los codos a 90°", "Levantar los glúteos del banco"],
+    "alternativas": ["press_mancuernas", "flexiones"],
+    "fotos": true
+  },
+  {
+    "id": "press_mancuernas",
+    "nombre": "Press de banca con mancuernas",
+    "grupoPrincipal": "pecho",
+    "gruposSecundarios": ["triceps", "hombros"],
+    "equipo": "mancuernas",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Siéntate con las mancuernas sobre los muslos y recuéstate llevándolas al pecho.",
+      "Empuja hacia arriba hasta que casi se toquen sobre el pecho.",
+      "Baja lento hasta sentir estiramiento en el pecho, codos a unos 45°."
+    ],
+    "erroresComunes": ["Bajar demasiado rápido", "Chocar las mancuernas arriba", "Arquear en exceso la espalda"],
+    "alternativas": ["press_banca", "flexiones"],
+    "fotos": true
+  },
+  {
+    "id": "press_inclinado_mancuernas",
+    "nombre": "Press inclinado con mancuernas",
+    "grupoPrincipal": "pecho",
+    "gruposSecundarios": ["hombros", "triceps"],
+    "equipo": "mancuernas",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Pon el banco a 30–45° y apoya bien la espalda.",
+      "Empuja las mancuernas hacia arriba sobre la parte alta del pecho.",
+      "Baja controlado hasta la altura del pecho con los codos a 45°."
+    ],
+    "erroresComunes": ["Inclinar demasiado el banco (trabaja más hombro)", "Despegar la espalda del respaldo"],
+    "alternativas": ["press_mancuernas", "flexiones"],
+    "fotos": true
+  },
+  {
+    "id": "flexiones",
+    "nombre": "Flexiones",
+    "grupoPrincipal": "pecho",
+    "gruposSecundarios": ["triceps", "hombros", "core"],
+    "equipo": "peso_corporal",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Apoya las manos algo más anchas que los hombros, cuerpo recto de cabeza a talones.",
+      "Baja el pecho hasta casi tocar el suelo con los codos a 45°.",
+      "Empuja el suelo hasta estirar los brazos.",
+      "Si cuesta, apoya las rodillas o las manos en un banco."
+    ],
+    "erroresComunes": ["Dejar caer la cadera", "Hacer medio recorrido", "Mirar hacia adelante tensando el cuello"],
+    "alternativas": ["press_mancuernas", "press_banca"],
+    "fotos": true
+  },
+  {
+    "id": "aperturas_mancuernas",
+    "nombre": "Aperturas con mancuernas",
+    "grupoPrincipal": "pecho",
+    "gruposSecundarios": ["hombros"],
+    "equipo": "mancuernas",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "Acostado en el banco, sube las mancuernas sobre el pecho con los codos un poco flexionados.",
+      "Abre los brazos en arco hasta sentir estiramiento en el pecho.",
+      "Vuelve a cerrar como si abrazaras un árbol."
+    ],
+    "erroresComunes": ["Estirar del todo los codos", "Bajar demasiado y forzar el hombro"],
+    "alternativas": ["cruce_poleas"],
+    "fotos": true
+  },
+  {
+    "id": "cruce_poleas",
+    "nombre": "Cruce de poleas",
+    "grupoPrincipal": "pecho",
+    "gruposSecundarios": ["hombros"],
+    "equipo": "gym",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "Pon las poleas altas, toma un agarre en cada mano y da un paso adelante.",
+      "Con el torso algo inclinado, junta las manos delante de la cadera en arco.",
+      "Regresa lento hasta sentir estiramiento en el pecho."
+    ],
+    "erroresComunes": ["Usar impulso del cuerpo", "Doblar y estirar los codos en cada repetición"],
+    "alternativas": ["aperturas_mancuernas"],
+    "fotos": true
+  },
+  {
+    "id": "fondos",
+    "nombre": "Fondos en paralelas",
+    "grupoPrincipal": "triceps",
+    "gruposSecundarios": ["pecho", "hombros"],
+    "equipo": "peso_corporal",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Sujétate en las paralelas con los brazos estirados.",
+      "Baja flexionando los codos hasta que los brazos queden paralelos al suelo.",
+      "Empuja hasta estirar los brazos sin bloquear de golpe."
+    ],
+    "erroresComunes": ["Bajar demasiado y forzar el hombro", "Encoger los hombros hacia las orejas"],
+    "alternativas": ["fondos_banco", "extension_polea"],
+    "fotos": true
+  },
+  {
+    "id": "dominadas",
+    "nombre": "Dominadas",
+    "grupoPrincipal": "espalda",
+    "gruposSecundarios": ["biceps"],
+    "equipo": "peso_corporal",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Cuélgate de la barra con agarre algo más ancho que los hombros.",
+      "Baja los hombros y tira hasta pasar la barbilla sobre la barra.",
+      "Baja controlado hasta estirar los brazos.",
+      "Si aún no puedes, usa una banda elástica o haz solo la bajada lenta."
+    ],
+    "erroresComunes": ["Balancearse", "Hacer medio recorrido", "Subir los hombros a las orejas"],
+    "alternativas": ["jalon_pecho", "remo_invertido"],
+    "fotos": true
+  },
+  {
+    "id": "jalon_pecho",
+    "nombre": "Jalón al pecho",
+    "grupoPrincipal": "espalda",
+    "gruposSecundarios": ["biceps"],
+    "equipo": "gym",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Siéntate con los muslos bajo los rodillos y agarra la barra ancha.",
+      "Saca el pecho y tira la barra hasta la parte alta del pecho.",
+      "Sube controlado hasta estirar los brazos."
+    ],
+    "erroresComunes": ["Tirar detrás de la nuca", "Echarse muy atrás para usar impulso"],
+    "alternativas": ["dominadas", "remo_mancuerna"],
+    "fotos": true
+  },
+  {
+    "id": "remo_barra",
+    "nombre": "Remo con barra",
+    "grupoPrincipal": "espalda",
+    "gruposSecundarios": ["biceps", "isquios"],
+    "equipo": "gym",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Con la barra en las manos, inclina el torso unos 45° con la espalda recta.",
+      "Tira la barra hacia el ombligo juntando los omóplatos.",
+      "Baja controlado sin perder la postura."
+    ],
+    "erroresComunes": ["Redondear la espalda", "Levantar el torso para usar impulso"],
+    "alternativas": ["remo_mancuerna", "remo_polea"],
+    "fotos": true
+  },
+  {
+    "id": "remo_mancuerna",
+    "nombre": "Remo con mancuerna a una mano",
+    "grupoPrincipal": "espalda",
+    "gruposSecundarios": ["biceps"],
+    "equipo": "mancuernas",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Apoya una rodilla y una mano en el banco, espalda recta.",
+      "Tira la mancuerna hacia la cadera llevando el codo atrás.",
+      "Baja hasta estirar el brazo y repite; luego cambia de lado."
+    ],
+    "erroresComunes": ["Girar el torso", "Tirar con el bíceps en vez de con la espalda"],
+    "alternativas": ["remo_barra", "remo_invertido"],
+    "fotos": true
+  },
+  {
+    "id": "remo_polea",
+    "nombre": "Remo sentado en polea",
+    "grupoPrincipal": "espalda",
+    "gruposSecundarios": ["biceps"],
+    "equipo": "gym",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Siéntate con los pies apoyados y las rodillas algo flexionadas.",
+      "Con el torso erguido, tira el agarre hacia el abdomen.",
+      "Junta los omóplatos un segundo y regresa estirando los brazos."
+    ],
+    "erroresComunes": ["Balancear el torso adelante y atrás", "Encoger los hombros"],
+    "alternativas": ["remo_mancuerna", "remo_barra"],
+    "fotos": true
+  },
+  {
+    "id": "remo_invertido",
+    "nombre": "Remo invertido",
+    "grupoPrincipal": "espalda",
+    "gruposSecundarios": ["biceps", "core"],
+    "equipo": "peso_corporal",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Cuélgate bajo una barra baja o una mesa firme, cuerpo recto.",
+      "Tira el pecho hacia la barra juntando los omóplatos.",
+      "Baja controlado. Más fácil cuanto más vertical estés."
+    ],
+    "erroresComunes": ["Dejar caer la cadera", "No completar el recorrido"],
+    "alternativas": ["remo_mancuerna", "dominadas"],
+    "fotos": true
+  },
+  {
+    "id": "peso_muerto",
+    "nombre": "Peso muerto",
+    "grupoPrincipal": "espalda",
+    "gruposSecundarios": ["gluteos", "isquios", "core"],
+    "equipo": "gym",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Pies a la anchura de la cadera, barra sobre el medio del pie.",
+      "Agarra la barra, baja la cadera, pecho arriba y espalda recta.",
+      "Empuja el suelo con las piernas y extiende la cadera con la barra pegada al cuerpo.",
+      "Baja llevando la cadera atrás, sin redondear la espalda."
+    ],
+    "erroresComunes": ["Redondear la espalda baja", "Alejar la barra del cuerpo", "Hiperextender arriba"],
+    "alternativas": ["peso_muerto_rumano", "rumano_mancuernas"],
+    "fotos": true
+  },
+  {
+    "id": "press_militar",
+    "nombre": "Press militar con barra",
+    "grupoPrincipal": "hombros",
+    "gruposSecundarios": ["triceps", "core"],
+    "equipo": "gym",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "De pie, barra sobre la parte alta del pecho, agarre a la anchura de hombros.",
+      "Aprieta glúteos y abdomen y empuja la barra sobre la cabeza.",
+      "Baja controlado hasta la clavícula."
+    ],
+    "erroresComunes": ["Arquear la espalda baja", "Empujar la barra hacia adelante en vez de arriba"],
+    "alternativas": ["press_hombro_mancuernas", "pike_pushup"],
+    "fotos": true
+  },
+  {
+    "id": "press_hombro_mancuernas",
+    "nombre": "Press de hombro con mancuernas",
+    "grupoPrincipal": "hombros",
+    "gruposSecundarios": ["triceps"],
+    "equipo": "mancuernas",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Sentado con respaldo, mancuernas a la altura de las orejas.",
+      "Empuja hacia arriba hasta casi estirar los brazos.",
+      "Baja controlado a la altura de las orejas."
+    ],
+    "erroresComunes": ["Despegar la espalda del respaldo", "Bajar solo la mitad"],
+    "alternativas": ["press_militar", "pike_pushup"],
+    "fotos": true
+  },
+  {
+    "id": "pike_pushup",
+    "nombre": "Flexiones pica",
+    "grupoPrincipal": "hombros",
+    "gruposSecundarios": ["triceps"],
+    "equipo": "peso_corporal",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Ponte en V invertida con la cadera alta y las manos al ancho de hombros.",
+      "Flexiona los codos llevando la cabeza hacia el suelo, entre las manos.",
+      "Empuja hasta estirar los brazos."
+    ],
+    "erroresComunes": ["Bajar la cadera y convertirlo en flexión normal", "Abrir mucho los codos"],
+    "alternativas": ["press_hombro_mancuernas", "press_militar"]
+  },
+  {
+    "id": "elevaciones_laterales",
+    "nombre": "Elevaciones laterales",
+    "grupoPrincipal": "hombros",
+    "gruposSecundarios": [],
+    "equipo": "mancuernas",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "De pie, mancuernas a los lados y codos un poco flexionados.",
+      "Sube los brazos hacia los lados hasta la altura de los hombros.",
+      "Baja lento, sin dejar caer."
+    ],
+    "erroresComunes": ["Usar demasiado peso y balancearse", "Subir por encima de los hombros encogiéndolos"],
+    "alternativas": ["face_pull"],
+    "fotos": true
+  },
+  {
+    "id": "pajaros",
+    "nombre": "Pájaros (deltoides posterior)",
+    "grupoPrincipal": "hombros",
+    "gruposSecundarios": ["espalda"],
+    "equipo": "mancuernas",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "Inclina el torso hacia adelante con la espalda recta y mancuernas colgando.",
+      "Abre los brazos hacia los lados juntando los omóplatos.",
+      "Baja controlado."
+    ],
+    "erroresComunes": ["Usar impulso del torso", "Doblar mucho los codos y convertirlo en remo"],
+    "alternativas": ["face_pull"],
+    "fotos": true
+  },
+  {
+    "id": "face_pull",
+    "nombre": "Face pull en polea",
+    "grupoPrincipal": "hombros",
+    "gruposSecundarios": ["espalda"],
+    "equipo": "gym",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "Polea a la altura de la cara con la cuerda.",
+      "Tira la cuerda hacia la frente separando las manos y llevando los codos altos.",
+      "Regresa lento hasta estirar los brazos."
+    ],
+    "erroresComunes": ["Tirar hacia el pecho", "Echarse hacia atrás"],
+    "alternativas": ["pajaros"],
+    "fotos": true
+  },
+  {
+    "id": "curl_barra",
+    "nombre": "Curl de bíceps con barra",
+    "grupoPrincipal": "biceps",
+    "gruposSecundarios": [],
+    "equipo": "gym",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "De pie, barra con agarre por debajo a la anchura de hombros.",
+      "Sube la barra flexionando los codos, sin moverlos del costado.",
+      "Baja lento hasta estirar los brazos."
+    ],
+    "erroresComunes": ["Balancear el cuerpo", "Adelantar los codos"],
+    "alternativas": ["curl_mancuernas", "curl_martillo"],
+    "fotos": true
+  },
+  {
+    "id": "curl_mancuernas",
+    "nombre": "Curl de bíceps con mancuernas",
+    "grupoPrincipal": "biceps",
+    "gruposSecundarios": [],
+    "equipo": "mancuernas",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "De pie o sentado, mancuernas a los lados con las palmas al frente.",
+      "Sube flexionando los codos sin moverlos.",
+      "Baja lento hasta estirar."
+    ],
+    "erroresComunes": ["Balancear el cuerpo", "Bajar sin control"],
+    "alternativas": ["curl_barra", "curl_martillo"],
+    "fotos": true
+  },
+  {
+    "id": "curl_martillo",
+    "nombre": "Curl martillo",
+    "grupoPrincipal": "biceps",
+    "gruposSecundarios": [],
+    "equipo": "mancuernas",
+    "tipo": "accesorio",
+    "instrucciones": ["Mancuernas a los lados con las palmas mirándose entre sí.", "Sube flexionando los codos manteniendo ese agarre.", "Baja lento."],
+    "erroresComunes": ["Mover los codos hacia adelante", "Usar impulso"],
+    "alternativas": ["curl_mancuernas", "curl_barra"],
+    "fotos": true
+  },
+  {
+    "id": "extension_polea",
+    "nombre": "Extensión de tríceps en polea",
+    "grupoPrincipal": "triceps",
+    "gruposSecundarios": [],
+    "equipo": "gym",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "Frente a la polea alta, agarra la cuerda o barra con los codos pegados al cuerpo.",
+      "Empuja hacia abajo hasta estirar los brazos.",
+      "Sube controlado sin separar los codos."
+    ],
+    "erroresComunes": ["Separar los codos del cuerpo", "Inclinarse encima para empujar con el peso"],
+    "alternativas": ["press_frances", "fondos_banco"],
+    "fotos": true
+  },
+  {
+    "id": "press_frances",
+    "nombre": "Press francés con mancuernas",
+    "grupoPrincipal": "triceps",
+    "gruposSecundarios": [],
+    "equipo": "mancuernas",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "Acostado en el banco, mancuernas sobre el pecho con las palmas enfrentadas.",
+      "Flexiona solo los codos llevando las mancuernas junto a la cabeza.",
+      "Estira los brazos volviendo arriba."
+    ],
+    "erroresComunes": ["Mover los hombros", "Abrir los codos"],
+    "alternativas": ["extension_polea", "fondos_banco"],
+    "fotos": true
+  },
+  {
+    "id": "fondos_banco",
+    "nombre": "Fondos en banco",
+    "grupoPrincipal": "triceps",
+    "gruposSecundarios": ["hombros"],
+    "equipo": "peso_corporal",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "Apoya las manos en el borde de un banco detrás de ti y las piernas al frente.",
+      "Baja flexionando los codos hasta unos 90°.",
+      "Empuja hasta estirar los brazos. Flexiona las rodillas para hacerlo más fácil."
+    ],
+    "erroresComunes": ["Bajar demasiado", "Alejar la espalda del banco"],
+    "alternativas": ["extension_polea", "press_frances"],
+    "fotos": true
+  },
+  {
+    "id": "sentadilla",
+    "nombre": "Sentadilla con barra",
+    "grupoPrincipal": "cuadriceps",
+    "gruposSecundarios": ["gluteos", "core"],
+    "equipo": "gym",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Barra sobre la parte alta de la espalda, pies al ancho de hombros.",
+      "Respira, aprieta el abdomen y baja llevando la cadera atrás y abajo.",
+      "Baja hasta que el muslo quede paralelo al suelo o lo que permita tu movilidad.",
+      "Sube empujando el suelo con todo el pie."
+    ],
+    "erroresComunes": ["Juntar las rodillas hacia adentro", "Levantar los talones", "Redondear la espalda"],
+    "alternativas": ["sentadilla_goblet", "prensa"],
+    "fotos": true
+  },
+  {
+    "id": "sentadilla_goblet",
+    "nombre": "Sentadilla goblet",
+    "grupoPrincipal": "cuadriceps",
+    "gruposSecundarios": ["gluteos", "core"],
+    "equipo": "mancuernas",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Sujeta una mancuerna vertical pegada al pecho.",
+      "Baja con el torso erguido y los codos entre las rodillas.",
+      "Sube empujando con todo el pie."
+    ],
+    "erroresComunes": ["Inclinar el torso hacia adelante", "Rodillas hacia adentro"],
+    "alternativas": ["sentadilla", "sentadilla_peso_corporal"],
+    "fotos": true
+  },
+  {
+    "id": "sentadilla_peso_corporal",
+    "nombre": "Sentadilla sin peso",
+    "grupoPrincipal": "cuadriceps",
+    "gruposSecundarios": ["gluteos"],
+    "equipo": "peso_corporal",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Pies al ancho de hombros, brazos al frente para equilibrarte.",
+      "Baja llevando la cadera atrás hasta que el muslo quede paralelo.",
+      "Sube empujando con todo el pie."
+    ],
+    "erroresComunes": ["Levantar los talones", "Rodillas hacia adentro"],
+    "alternativas": ["sentadilla_goblet", "zancadas"],
+    "fotos": true
+  },
+  {
+    "id": "prensa",
+    "nombre": "Prensa de piernas",
+    "grupoPrincipal": "cuadriceps",
+    "gruposSecundarios": ["gluteos"],
+    "equipo": "gym",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Siéntate con la espalda apoyada y los pies al ancho de hombros en la plataforma.",
+      "Quita los seguros y baja flexionando las rodillas hacia el pecho.",
+      "Empuja sin bloquear las rodillas arriba."
+    ],
+    "erroresComunes": ["Despegar la cadera del asiento al bajar", "Bloquear las rodillas"],
+    "alternativas": ["sentadilla", "sentadilla_goblet"],
+    "fotos": true
+  },
+  {
+    "id": "zancadas",
+    "nombre": "Zancadas con mancuernas",
+    "grupoPrincipal": "cuadriceps",
+    "gruposSecundarios": ["gluteos"],
+    "equipo": "mancuernas",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "De pie con una mancuerna en cada mano.",
+      "Da un paso largo al frente y baja hasta que ambas rodillas queden a unos 90°.",
+      "Empuja con la pierna delantera para volver y alterna."
+    ],
+    "erroresComunes": ["Paso muy corto", "Rodilla delantera hacia adentro"],
+    "alternativas": ["sentadilla_bulgara", "sentadilla_peso_corporal"],
+    "fotos": true
+  },
+  {
+    "id": "sentadilla_bulgara",
+    "nombre": "Sentadilla búlgara",
+    "grupoPrincipal": "cuadriceps",
+    "gruposSecundarios": ["gluteos"],
+    "equipo": "mancuernas",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Apoya el empeine del pie trasero en un banco.",
+      "Baja con la pierna delantera hasta que el muslo quede paralelo.",
+      "Sube empujando con el talón delantero. Termina las reps y cambia de pierna."
+    ],
+    "erroresComunes": ["Pie delantero demasiado cerca del banco", "Perder el equilibrio por ir rápido"],
+    "alternativas": ["zancadas", "sentadilla_goblet"],
+    "fotos": true
+  },
+  {
+    "id": "extension_cuadriceps",
+    "nombre": "Extensión de cuádriceps",
+    "grupoPrincipal": "cuadriceps",
+    "gruposSecundarios": [],
+    "equipo": "gym",
+    "tipo": "accesorio",
+    "instrucciones": ["Siéntate en la máquina con el rodillo sobre los tobillos.", "Estira las piernas hasta arriba y aprieta un segundo.", "Baja lento."],
+    "erroresComunes": ["Dar patadas con impulso", "Levantar la cadera del asiento"],
+    "alternativas": ["sentadilla_bulgara"],
+    "fotos": true
+  },
+  {
+    "id": "peso_muerto_rumano",
+    "nombre": "Peso muerto rumano con barra",
+    "grupoPrincipal": "isquios",
+    "gruposSecundarios": ["gluteos", "espalda"],
+    "equipo": "gym",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "De pie con la barra, rodillas apenas flexionadas.",
+      "Lleva la cadera atrás bajando la barra pegada a las piernas, espalda recta.",
+      "Baja hasta sentir estiramiento en los isquios (por debajo de las rodillas).",
+      "Sube empujando la cadera hacia adelante."
+    ],
+    "erroresComunes": ["Redondear la espalda", "Doblar demasiado las rodillas (se vuelve sentadilla)"],
+    "alternativas": ["rumano_mancuernas", "curl_femoral"],
+    "fotos": true
+  },
+  {
+    "id": "rumano_mancuernas",
+    "nombre": "Peso muerto rumano con mancuernas",
+    "grupoPrincipal": "isquios",
+    "gruposSecundarios": ["gluteos", "espalda"],
+    "equipo": "mancuernas",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "De pie con una mancuerna en cada mano frente a los muslos.",
+      "Lleva la cadera atrás bajando las mancuernas pegadas a las piernas.",
+      "Sube empujando la cadera adelante y aprieta glúteos."
+    ],
+    "erroresComunes": ["Redondear la espalda", "Alejar las mancuernas del cuerpo"],
+    "alternativas": ["peso_muerto_rumano", "puente_gluteo"],
+    "fotos": true
+  },
+  {
+    "id": "curl_femoral",
+    "nombre": "Curl femoral en máquina",
+    "grupoPrincipal": "isquios",
+    "gruposSecundarios": ["gemelos"],
+    "equipo": "gym",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "Acuéstate o siéntate en la máquina con el rodillo sobre los tobillos.",
+      "Flexiona las rodillas llevando los talones hacia los glúteos.",
+      "Regresa lento."
+    ],
+    "erroresComunes": ["Levantar la cadera", "Soltar el peso de golpe"],
+    "alternativas": ["rumano_mancuernas"],
+    "fotos": true
+  },
+  {
+    "id": "hip_thrust",
+    "nombre": "Hip thrust con barra",
+    "grupoPrincipal": "gluteos",
+    "gruposSecundarios": ["isquios"],
+    "equipo": "gym",
+    "tipo": "compuesto",
+    "instrucciones": [
+      "Apoya la parte alta de la espalda en un banco y la barra sobre la cadera (con almohadilla).",
+      "Pies apoyados, empuja la cadera hacia arriba hasta alinear rodillas, cadera y hombros.",
+      "Aprieta los glúteos un segundo y baja controlado."
+    ],
+    "erroresComunes": ["Arquear la espalda baja arriba", "Pies demasiado lejos o cerca"],
+    "alternativas": ["puente_gluteo", "rumano_mancuernas"],
+    "fotos": true
+  },
+  {
+    "id": "puente_gluteo",
+    "nombre": "Puente de glúteo",
+    "grupoPrincipal": "gluteos",
+    "gruposSecundarios": ["isquios", "core"],
+    "equipo": "peso_corporal",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "Acostado boca arriba, rodillas flexionadas y pies apoyados.",
+      "Sube la cadera apretando los glúteos.",
+      "Mantén un segundo y baja lento. Puedes poner una mancuerna sobre la cadera."
+    ],
+    "erroresComunes": ["Empujar con la espalda baja", "Subir demasiado rápido"],
+    "alternativas": ["hip_thrust"],
+    "fotos": true
+  },
+  {
+    "id": "elevacion_gemelos",
+    "nombre": "Elevación de gemelos",
+    "grupoPrincipal": "gemelos",
+    "gruposSecundarios": [],
+    "equipo": "mancuernas",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "De pie en el borde de un escalón con una mancuerna en la mano.",
+      "Sube en puntas lo más alto posible.",
+      "Baja lento hasta sentir estiramiento en el gemelo."
+    ],
+    "erroresComunes": ["Rebotar abajo", "Hacer medio recorrido"],
+    "alternativas": [],
+    "fotos": true
+  },
+  {
+    "id": "plancha",
+    "nombre": "Plancha",
+    "grupoPrincipal": "core",
+    "gruposSecundarios": ["hombros"],
+    "equipo": "peso_corporal",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "Apóyate en antebrazos y puntas de los pies.",
+      "Cuerpo recto: aprieta abdomen y glúteos.",
+      "Mantén la posición el tiempo indicado respirando normal."
+    ],
+    "erroresComunes": ["Dejar caer la cadera", "Subir demasiado la cadera", "Aguantar la respiración"],
+    "alternativas": ["dead_bug"],
+    "fotos": true
+  },
+  {
+    "id": "dead_bug",
+    "nombre": "Dead bug",
+    "grupoPrincipal": "core",
+    "gruposSecundarios": [],
+    "equipo": "peso_corporal",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "Acostado boca arriba, brazos al techo y rodillas a 90° en el aire.",
+      "Pega la espalda baja al suelo y estira un brazo y la pierna contraria.",
+      "Vuelve al centro y alterna lados."
+    ],
+    "erroresComunes": ["Despegar la espalda baja del suelo", "Ir demasiado rápido"],
+    "alternativas": ["plancha", "crunch"],
+    "fotos": true
+  },
+  {
+    "id": "crunch",
+    "nombre": "Crunch abdominal",
+    "grupoPrincipal": "core",
+    "gruposSecundarios": [],
+    "equipo": "peso_corporal",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "Acostado boca arriba, rodillas flexionadas y manos en el pecho.",
+      "Sube los hombros del suelo enrollando el tronco.",
+      "Baja lento sin apoyar del todo la cabeza."
+    ],
+    "erroresComunes": ["Tirar del cuello con las manos", "Usar impulso"],
+    "alternativas": ["elevacion_piernas", "dead_bug"],
+    "fotos": true
+  },
+  {
+    "id": "elevacion_piernas",
+    "nombre": "Elevación de piernas tumbado",
+    "grupoPrincipal": "core",
+    "gruposSecundarios": [],
+    "equipo": "peso_corporal",
+    "tipo": "accesorio",
+    "instrucciones": [
+      "Acostado boca arriba con las manos bajo los glúteos.",
+      "Sube las piernas juntas hasta la vertical.",
+      "Baja lento sin que la espalda baja se despegue del suelo."
+    ],
+    "erroresComunes": ["Arquear la espalda baja", "Dejar caer las piernas"],
+    "alternativas": ["crunch", "dead_bug"],
+    "fotos": true
+  }
+]
