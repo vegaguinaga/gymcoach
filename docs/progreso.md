@@ -1,6 +1,14 @@
 # Progreso de GymCoach
 
-## Estado actual: Fase 2 completada (2026-11-08)
+## Estado actual: Fase 3 completada (2026-11-08)
+- Dominio: `src/domain/fuerza.ts` (Epley 1–12 reps, volumen, mejor 1RM) y `src/domain/sesion.ts` (día que toca, series iniciales con kg/reps de la última vez, agregar/quitar serie, temporizador, resumen). Con tests.
+- `WorkoutSession` ahora guarda `estado` (en_curso | terminada), `diaIndice`, `fin`, `descansoHasta` y una copia del plan del día (`ejercicios`).
+- Dexie **versión 3**: tabla `sesiones` ('++id, fecha, estado'). La sesión en curso se guarda en cada cambio con `modificarSesion` (transacción sobre lo último guardado: evita pisar cambios).
+- Pantalla Entrenar (`src/features/entrenar/`): selector de día ("Toca hoy"), tarjetas con kg/reps/RPE/✓, + serie / quitar, barra de descanso fija (±15 s, saltar, vibración + pitido; el audio se prepara al tocar ✓ por las reglas del navegador), pantalla encendida (Wake Lock) y resumen final.
+- Peso corporal: el campo kg es el lastre extra (0 = sin lastre), así que no suma volumen.
+- Build: JS ≈ 115 KB gzip.
+
+## Fase 2 (2026-11-08)
 - Generador en `src/domain/generador.ts` (con tests): split por días (2–3 Full Body A/B, 4 Torso/Pierna, 5 Empuje/Tirón/Pierna + Torso/Pierna; 6 se limita a 5).
 - Plantillas de días con "huecos" = listas de ejercicios por preferencia; se elige el primero con el equipo del perfil, sin repetir en el día y, si se puede, en la semana. La plancha no entra (se mide en segundos).
 - Compuestos 3×6–10 RPE 7, 150 s; accesorios 3×10–15 RPE 8, 75 s (2 series con 5 días). Tiempo: 5 min de calentamiento + 2.5 min/serie + cardio; `ajustarATiempo` recorta accesorios y después compuestos.
@@ -27,9 +35,9 @@
 - Primer test de dominio: `redondearKg` (`src/domain/unidades.ts`).
 - Build: JS inicial ≈ 69 KB gzip.
 
-## Siguiente: Fase 3
-Entrenar en vivo: elegir día de la rutina, registrar series (kg, reps, RPE), temporizador de descanso, guardar `WorkoutSession` (Dexie v3).
-Pendiente opcional: cambiar un ejercicio de la rutina por una de sus alternativas.
+## Siguiente: Fase 4
+Progreso: historial de sesiones, gráficas con Recharts (1RM estimado y volumen por ejercicio, peso corporal) y récords personales.
+Después: sugerencia de peso con doble progresión y descargas; cambiar un ejercicio de la rutina por una alternativa.
 
 ## Notas
 - Node se instaló con nvm: en shells no interactivos hay que cargar `~/.nvm/nvm.sh` antes de `npm`.
