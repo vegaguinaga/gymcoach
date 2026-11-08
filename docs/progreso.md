@@ -93,4 +93,5 @@
 Por definir. Pendiente: probar la instalación y las pantallas nuevas en un teléfono real (iOS/Android), sobre todo el cronómetro de la plancha y el formulario de medidas. Revisar `npm audit` cuando salga una versión nueva de vite-plugin-pwa/workbox. Si se añaden más isométricos, solo hay que sumarlos a `EJERCICIOS_POR_TIEMPO` y a la biblioteca.
 
 ## Notas
+- **Publicada en https://vegaguinaga.github.io/gymcoach/** (GitHub Pages, repo público). `.github/workflows/deploy.yml` corre los tests y el build con `BASE_PATH=/gymcoach/` en cada push a `main` y despliega. En local la base sigue siendo `/`.
 - Node se instaló con nvm: en shells no interactivos hay que cargar `~/.nvm/nvm.sh` antes de `npm`.
