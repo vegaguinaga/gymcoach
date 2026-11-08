@@ -1,6 +1,7 @@
 // Edición de sesiones ya terminadas (corregir lo que se anotó mal).
 // Los récords, la progresión y el 1RM se recalculan solos porque se leen de las sesiones.
-import type { SetLog } from './tipos'
+import { claveDia } from './calendario'
+import type { SetLog, WorkoutSession } from './tipos'
 import { redondearKg } from './unidades'
 
 export const MAX_KG = 500
@@ -25,4 +26,38 @@ export function editarSerie(series: SetLog[], indice: number, cambios: Partial<O
 /** true si las series editadas son distintas de las guardadas (para habilitar «Guardar»). */
 export function hayCambios(antes: SetLog[], despues: SetLog[]): boolean {
   return JSON.stringify(antes.map(normalizarSerie)) !== JSON.stringify(despues.map(normalizarSerie))
+}
+
+/** Convierte 'AAAA-MM-DD' y 'HH:MM' (hora local) en una fecha; null si no son válidos. */
+export function fechaLocal(dia: string, hora = '00:00'): Date | null {
+  const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dia)
+  const h = /^(\d{2}):(\d{2})$/.exec(hora)
+  if (!d || !h) return null
+  const [anio, mes, num] = [Number(d[1]), Number(d[2]), Number(d[3])]
+  const fecha = new Date(anio, mes - 1, num, Number(h[1]), Number(h[2]))
+  // Descarta días que no existen (ej. 31 de febrero) y horas fuera de rango
+  if (fecha.getFullYear() !== anio || fecha.getMonth() !== mes - 1 || fecha.getDate() !== num) return null
+  if (fecha.getHours() !== Number(h[1]) || fecha.getMinutes() !== Number(h[2])) return null
+  return fecha
+}
+
+/**
+ * Mueve una sesión terminada a otro día, conservando la hora de inicio y la duración.
+ * No acepta días futuros (null). Si al moverla a hoy quedaría empezando más tarde que ahora,
+ * se adelanta para que termine ahora.
+ */
+export function cambiarFecha(
+  sesion: Pick<WorkoutSession, 'fecha' | 'fin'>,
+  dia: string,
+  ahora = new Date(),
+): { fecha: string; fin?: string } | null {
+  const original = new Date(sesion.fecha)
+  const hora = `${String(original.getHours()).padStart(2, '0')}:${String(original.getMinutes()).padStart(2, '0')}`
+  const inicio = fechaLocal(dia, hora)
+  if (!inicio || dia > claveDia(ahora)) return null
+  inicio.setSeconds(original.getSeconds(), original.getMilliseconds())
+  const duracion = sesion.fin ? Math.max(0, Date.parse(sesion.fin) - original.getTime()) : 0
+  let ms = inicio.getTime()
+  if (ms + duracion > ahora.getTime()) ms = ahora.getTime() - duracion
+  return { fecha: new Date(ms).toISOString(), ...(sesion.fin && { fin: new Date(ms + duracion).toISOString() }) }
 }

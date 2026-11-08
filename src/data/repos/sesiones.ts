@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { normalizarSerie } from '../../domain/edicionSesion'
+import { cambiarFecha, normalizarSerie } from '../../domain/edicionSesion'
 import { normalizarNota } from '../../domain/notas'
 import { nuevaSesion } from '../../domain/sesion'
 import type { Routine, SetLog, WorkoutSession } from '../../domain/tipos'
@@ -80,5 +80,16 @@ export async function editarSesionTerminada(id: number, series: SetLog[]): Promi
   await db.transaction('rw', db.sesiones, async () => {
     const actual = await db.sesiones.get(id)
     if (actual?.estado === 'terminada') await db.sesiones.update(id, { series: series.map(normalizarSerie) })
+  })
+}
+
+/** Mueve una sesión terminada a otro día ('AAAA-MM-DD'). Devuelve false si la fecha no es válida (ej. futura). */
+export async function cambiarFechaSesion(id: number, dia: string): Promise<boolean> {
+  return db.transaction('rw', db.sesiones, async () => {
+    const actual = await db.sesiones.get(id)
+    const nueva = actual?.estado === 'terminada' ? cambiarFecha(actual, dia) : null
+    if (!nueva) return false
+    await db.sesiones.update(id, nueva)
+    return true
   })
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { editarSerie, hayCambios, normalizarSerie } from '../edicionSesion'
+import { cambiarFecha, editarSerie, fechaLocal, hayCambios, normalizarSerie } from '../edicionSesion'
 import type { SetLog } from '../tipos'
 
 const serie = (ejercicioId: string, n: number, kg: number, reps: number, completada = true): SetLog => ({
@@ -44,5 +44,41 @@ describe('hayCambios', () => {
     expect(hayCambios(base, base.map((s) => ({ ...s })))).toBe(false)
     expect(hayCambios(base, editarSerie(base, 0, { reps: 9 }))).toBe(true)
     expect(hayCambios(base, base.slice(1))).toBe(true)
+  })
+})
+
+describe('fechaLocal', () => {
+  it('arma la fecha en hora local', () => {
+    expect(fechaLocal('2026-03-05', '18:30')).toEqual(new Date(2026, 2, 5, 18, 30))
+  })
+  it('rechaza formatos y días inválidos', () => {
+    expect(fechaLocal('2026-02-31')).toBeNull()
+    expect(fechaLocal('5/3/2026')).toBeNull()
+    expect(fechaLocal('2026-03-05', '25:00')).toBeNull()
+  })
+})
+
+describe('cambiarFecha', () => {
+  const ahora = new Date(2026, 10, 8, 12, 0)
+  const sesion = { fecha: new Date(2026, 10, 3, 18, 0).toISOString(), fin: new Date(2026, 10, 3, 19, 5).toISOString() }
+
+  it('conserva la hora y la duración', () => {
+    expect(cambiarFecha(sesion, '2026-11-01', ahora)).toEqual({
+      fecha: new Date(2026, 10, 1, 18, 0).toISOString(),
+      fin: new Date(2026, 10, 1, 19, 5).toISOString(),
+    })
+  })
+  it('no acepta días futuros ni fechas inválidas', () => {
+    expect(cambiarFecha(sesion, '2026-11-09', ahora)).toBeNull()
+    expect(cambiarFecha(sesion, 'mañana', ahora)).toBeNull()
+  })
+  it('si hoy quedaría en el futuro, termina ahora', () => {
+    expect(cambiarFecha(sesion, '2026-11-08', ahora)).toEqual({
+      fecha: new Date(2026, 10, 8, 10, 55).toISOString(),
+      fin: ahora.toISOString(),
+    })
+  })
+  it('sin fin, solo mueve el inicio', () => {
+    expect(cambiarFecha({ fecha: sesion.fecha }, '2026-11-02', ahora)).toEqual({ fecha: new Date(2026, 10, 2, 18, 0).toISOString() })
   })
 })

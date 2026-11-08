@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { borrarSesion, editarSesionTerminada, useSesion, useSesionesTerminadas } from '../../data/repos/sesiones'
+import { borrarSesion, cambiarFechaSesion, editarSesionTerminada, useSesion, useSesionesTerminadas } from '../../data/repos/sesiones'
+import { claveDia } from '../../domain/calendario'
 import { editarSerie, hayCambios } from '../../domain/edicionSesion'
 import { volumen } from '../../domain/fuerza'
 import { recordsNuevos } from '../../domain/progreso'
@@ -132,6 +133,7 @@ export function DetalleSesion({ id, ejercicios }: { id: number; ejercicios: Map<
             >
               ✏️ Editar series
             </button>
+            <CambiarFecha id={id} fecha={sesion.fecha} />
             <button
               type="button"
               onClick={borrar}
@@ -250,6 +252,65 @@ function EditorSeries({ series, ejercicioId, repsPorDefecto, alCambiar }: PropsE
       >
         + Serie
       </button>
+    </div>
+  )
+}
+
+/** Botón «Cambiar fecha» que despliega un selector de día (hasta hoy). Conserva la hora y la duración. */
+function CambiarFecha({ id, fecha }: { id: number; fecha: string }) {
+  const [abierto, setAbierto] = useState(false)
+  const [dia, setDia] = useState(() => claveDia(new Date(fecha)))
+  const [error, setError] = useState('')
+  const [hoy] = useState(() => claveDia(new Date()))
+
+  async function guardar() {
+    if (await cambiarFechaSesion(id, dia)) {
+      setAbierto(false)
+      setError('')
+    } else setError('Elige un día válido, hasta hoy.')
+  }
+
+  if (!abierto)
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setDia(claveDia(new Date(fecha)))
+          setAbierto(true)
+        }}
+        className="min-h-12 rounded-xl bg-neutral-800 font-semibold"
+      >
+        📅 Cambiar fecha
+      </button>
+    )
+
+  return (
+    <div className="flex flex-col gap-2 rounded-xl bg-neutral-900 p-4">
+      <label htmlFor="nueva-fecha" className="text-sm text-neutral-300">
+        ¿Qué día entrenaste? Se conserva la hora y la duración.
+      </label>
+      <input
+        id="nueva-fecha"
+        type="date"
+        value={dia}
+        max={hoy}
+        onChange={(e) => setDia(e.target.value)}
+        className="min-h-12 rounded-lg border border-neutral-700 bg-neutral-950 px-3 [color-scheme:dark]"
+      />
+      {error && <p className="text-sm text-red-300">{error}</p>}
+      <div className="flex gap-2">
+        <button type="button" onClick={() => setAbierto(false)} className="min-h-12 flex-1 rounded-xl bg-neutral-800 font-semibold">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          onClick={guardar}
+          disabled={!dia || dia === claveDia(new Date(fecha))}
+          className="min-h-12 flex-1 rounded-xl bg-lime-400 font-bold text-neutral-950 disabled:opacity-40"
+        >
+          Guardar
+        </button>
+      </div>
     </div>
   )
 }
