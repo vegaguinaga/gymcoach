@@ -13,15 +13,17 @@ import { DetalleSesion } from './DetalleSesion'
 import { GraficaEjercicio } from './GraficaEjercicio'
 import { GraficaPeso } from './GraficaPeso'
 import { Historial } from './Historial'
+import { Medidas } from './Medidas'
 import { SesionOlvidada } from './SesionOlvidada'
 
-const SECCIONES = { historial: 'Historial', calendario: 'Calendario', ejercicios: 'Ejercicios', volumen: 'Volumen', peso: 'Peso' } as const
+const SECCIONES = { historial: 'Historial', calendario: 'Calendario', ejercicios: 'Ejercicios', volumen: 'Volumen', cuerpo: 'Cuerpo' } as const
 type Seccion = keyof typeof SECCIONES
 
 // Sección abierta: se recuerda al volver de una sesión (ej. desde el calendario)
 function seccionGuardada(): Seccion {
   try {
-    const s = sessionStorage.getItem('progreso.seccion')
+    // 'peso' se llamaba así hasta la fase 9: ahora es 'cuerpo'
+    const s = sessionStorage.getItem('progreso.seccion')?.replace(/^peso$/, 'cuerpo')
     return s && s in SECCIONES ? (s as Seccion) : 'historial'
   } catch {
     return 'historial'
@@ -97,7 +99,12 @@ export default function PantallaProgreso({ param }: { param?: string }) {
           ) : (
             <p className="text-neutral-400">Genera tu rutina para comparar lo que haces con lo planificado.</p>
           ))}
-        {seccion === 'peso' && <GraficaPeso />}
+        {seccion === 'cuerpo' && (
+          <>
+            <GraficaPeso />
+            <Medidas />
+          </>
+        )}
       </div>
     </Pantalla>
   )

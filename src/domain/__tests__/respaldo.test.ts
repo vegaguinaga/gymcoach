@@ -21,6 +21,7 @@ const datos: DatosUsuario = {
       series: [{ ejercicioId: 'sentadilla', serie: 1, kg: 60, reps: 8, completada: true }],
     },
   ],
+  medidas: [{ id: 4, fecha: '2026-01-03T10:00:00Z', cm: { cintura: 85 } }],
 }
 const ahora = new Date('2026-11-08T12:00:00Z')
 // Simula guardar el archivo y volver a leerlo
@@ -41,7 +42,7 @@ describe('respaldo', () => {
   })
 
   it('acepta un respaldo vacío (app recién instalada)', () => {
-    const v = validarRespaldo(idaYVuelta(crearRespaldo({ perfil: [], pesosCorporales: [], rutinas: [], sesiones: [] })))
+    const v = validarRespaldo(idaYVuelta(crearRespaldo({ perfil: [], pesosCorporales: [], rutinas: [], sesiones: [], medidas: [] })))
     expect(v.ok).toBe(true)
   })
 
@@ -73,8 +74,22 @@ describe('respaldo', () => {
 
   it('resume lo que trae (solo sesiones terminadas)', () => {
     const conEnCurso = { ...datos, sesiones: [...datos.sesiones, { ...datos.sesiones[0], id: 4, estado: 'en_curso' as const }] }
-    expect(resumenRespaldo(conEnCurso)).toBe('1 sesión, 1 rutina y 1 registro de peso')
-    expect(resumenRespaldo({ ...datos, rutinas: [], sesiones: [] })).toBe('0 sesiones, 0 rutinas y 1 registro de peso')
+    expect(resumenRespaldo(conEnCurso)).toBe('1 sesión, 1 rutina, 1 registro de peso y 1 registro de medidas')
+    expect(resumenRespaldo({ ...datos, rutinas: [], sesiones: [], medidas: [] })).toBe('0 sesiones, 0 rutinas y 1 registro de peso')
+  })
+
+  it('acepta copias v1 (sin medidas) y las deja con medidas vacías', () => {
+    const { medidas: _, ...sinMedidas } = crearRespaldo(datos)
+    const v = validarRespaldo({ ...idaYVuelta(sinMedidas) as object, version: 1 })
+    expect(v.ok && v.respaldo.medidas).toEqual([])
+    expect(v.ok && v.respaldo.sesiones).toHaveLength(1)
+  })
+
+  it('en v2 las medidas son obligatorias y se validan', () => {
+    const { medidas: _, ...sinMedidas } = crearRespaldo(datos)
+    expect(validarRespaldo(idaYVuelta(sinMedidas))).toEqual({ ok: false, error: 'Falta la sección de medidas.' })
+    const mala = { ...crearRespaldo(datos), medidas: [{ fecha: '2026-01-01', cm: { oreja: 5 } }] }
+    expect(validarRespaldo(idaYVuelta(mala))).toEqual({ ok: false, error: 'Hay un dato dañado en medidas (n.º 1).' })
   })
 })
 

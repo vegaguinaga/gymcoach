@@ -58,6 +58,17 @@ export interface BodyWeightEntry {
   kg: number
 }
 
+// --- Medidas corporales (fase 10) ---
+export const MEDIDAS = ['cintura', 'cadera', 'pecho', 'brazo', 'muslo'] as const
+export type Medida = (typeof MEDIDAS)[number]
+
+export interface BodyMeasurement {
+  id?: number
+  fecha: string
+  /** Centímetros con 1 decimal; solo las medidas que se tomaron ese día */
+  cm: Partial<Record<Medida, number>>
+}
+
 // --- Rutinas (fase 2) y sesiones (fase 3) ---
 
 export interface EjercicioPlanificado {
