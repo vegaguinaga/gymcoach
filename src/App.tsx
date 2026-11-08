@@ -1,25 +1,42 @@
+import { useEffect } from 'react'
+import { sincronizarBiblioteca } from './data/repos/ejercicios'
+import { FichaEjercicio } from './features/biblioteca/FichaEjercicio'
+import { PantallaBiblioteca } from './features/biblioteca/PantallaBiblioteca'
+import { PantallaPerfil } from './features/perfil/PantallaPerfil'
 import { BarraNavegacion } from './ui/BarraNavegacion'
 import { Pantalla } from './ui/Pantalla'
-import { useRuta, type Ruta } from './ui/useRuta'
+import { useRuta } from './ui/useRuta'
 
 // Pantallas provisionales: cada fase las irá reemplazando por las reales
-const PROVISIONAL: Record<Ruta, { titulo: string; texto: string }> = {
+const PROVISIONAL = {
   rutina: { titulo: 'Mi rutina', texto: 'Aquí verás tu plan semanal (fase 2).' },
   entrenar: { titulo: 'Entrenar', texto: 'Aquí registrarás tu sesión en vivo (fase 3).' },
   progreso: { titulo: 'Progreso', texto: 'Aquí verás tu historial y gráficas (fase 4).' },
-  perfil: { titulo: 'Perfil', texto: 'Aquí configurarás tu objetivo y equipo (fase 1).' },
 }
 
 export default function App() {
-  const ruta = useRuta()
-  const { titulo, texto } = PROVISIONAL[ruta]
+  const { ruta, param } = useRuta()
+
+  useEffect(() => {
+    sincronizarBiblioteca().catch((e: unknown) => console.error('No se pudo cargar la biblioteca', e))
+  }, [])
+
+  let contenido
+  if (ruta === 'perfil') contenido = <PantallaPerfil />
+  else if (ruta === 'ejercicios')
+    contenido = param ? <FichaEjercicio id={param} /> : <PantallaBiblioteca />
+  else
+    contenido = (
+      <Pantalla titulo={PROVISIONAL[ruta].titulo}>
+        <p className="text-neutral-400">{PROVISIONAL[ruta].texto}</p>
+      </Pantalla>
+    )
 
   return (
     <>
-      <Pantalla titulo={titulo}>
-        <p className="text-neutral-400">{texto}</p>
-      </Pantalla>
-      <BarraNavegacion actual={ruta} />
+      {contenido}
+      {/* La biblioteca cuelga de Perfil: esa pestaña queda marcada */}
+      <BarraNavegacion actual={ruta === 'ejercicios' ? 'perfil' : ruta} />
     </>
   )
 }
