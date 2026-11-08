@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { mejor1RM, unoRMEpley, volumen } from '../fuerza'
 import {
   agregarSerie,
+  cambiarEjercicioEnSesion,
   finDescanso,
   nuevaSesion,
   quitarSerie,
@@ -11,7 +12,7 @@ import {
   siguienteDia,
   ultimasSeries,
 } from '../sesion'
-import type { DiaRutina, Routine, SetLog, WorkoutSession } from '../tipos'
+import type { DiaRutina, Exercise, Routine, SetLog, WorkoutSession } from '../tipos'
 
 const plan = (ejercicioId: string, series = 3, repsMin = 6) => ({
   ejercicioId, series, repsMin, repsMax: repsMin + 4, rpe: 7, descansoSeg: 150,
@@ -137,5 +138,60 @@ describe('resumenSesion', () => {
       volumenKg: 900,
       mejores: [{ ejercicioId: 'a', unoRM: 66.7 }],
     })
+  })
+})
+
+describe('cambiarEjercicioEnSesion', () => {
+  const ej = (id: string, tipo: Exercise['tipo'] = 'compuesto'): Exercise => ({
+    id, nombre: id, grupoPrincipal: 'cuadriceps', gruposSecundarios: [], equipo: 'gym', tipo,
+    instrucciones: [], erroresComunes: [], alternativas: [],
+  })
+  const prensa = ej('prensa')
+  const enCurso = (series: SetLog[], cambios: Partial<WorkoutSession> = {}) =>
+    sesion({ estado: 'en_curso', ejercicios: diaA.ejercicios, series, sugerencias: {}, ...cambios })
+  const base = [
+    serie('sentadilla', 1, 60, 8, false), serie('sentadilla', 2, 60, 8, false), serie('sentadilla', 3, 60, 8, false),
+    serie('curl', 1, 10, 10, false), serie('curl', 2, 10, 10, false),
+  ]
+
+  it('sin series hechas: reemplaza al original en su lugar, con todas sus series', () => {
+    const r = cambiarEjercicioEnSesion(enCurso(base), 0, prensa, [])
+    expect(r.ejercicios.map((e) => e.ejercicioId)).toEqual(['prensa', 'curl'])
+    expect(r.series.map((s) => s.ejercicioId)).toEqual(['prensa', 'prensa', 'prensa', 'curl', 'curl'])
+    expect(r.sugerencias?.prensa.tipo).toBe('nuevo')
+    expect(r.sugerencias?.sentadilla).toBeUndefined()
+  })
+
+  it('con series hechas: las conserva y el nuevo hace solo las que faltaban', () => {
+    const hechas = base.map((s, i) => (i === 0 ? { ...s, completada: true } : s))
+    const r = cambiarEjercicioEnSesion(enCurso(hechas), 0, prensa, [])
+    expect(r.ejercicios.map((e) => [e.ejercicioId, e.series])).toEqual([['sentadilla', 1], ['prensa', 2], ['curl', 2]])
+    expect(r.series.map((s) => s.ejercicioId)).toEqual(['sentadilla', 'prensa', 'prensa', 'curl', 'curl'])
+    expect(r.series[0]).toEqual(hechas[0])
+  })
+
+  it('usa el historial del nuevo para sugerir el peso', () => {
+    const previa = sesion({ series: [serie('prensa', 1, 100, 8), serie('prensa', 2, 100, 8), serie('prensa', 3, 100, 8)] })
+    const r = cambiarEjercicioEnSesion(enCurso(base), 0, prensa, [previa])
+    expect(r.series.filter((s) => s.ejercicioId === 'prensa').every((s) => s.kg === 100)).toBe(true)
+  })
+
+  it('aplica la prescripción del tipo del nuevo (accesorio: 10–15 reps)', () => {
+    const r = cambiarEjercicioEnSesion(enCurso(base), 0, ej('extension', 'accesorio'), [])
+    expect(r.ejercicios[0]).toMatchObject({ ejercicioId: 'extension', series: 3, repsMin: 10, repsMax: 15 })
+  })
+
+  it('en descarga mantiene el número de series pendientes (no las vuelve a dividir)', () => {
+    const r = cambiarEjercicioEnSesion(enCurso(base.slice(0, 2), { descarga: true, ejercicios: [plan('sentadilla', 2), plan('curl', 1, 10)] }), 0, prensa, [
+      sesion({ series: [serie('prensa', 1, 100, 8), serie('prensa', 2, 100, 8), serie('prensa', 3, 100, 8)] }),
+    ])
+    expect(r.series.filter((s) => s.ejercicioId === 'prensa')).toHaveLength(2)
+    expect(r.sugerencias?.prensa.tipo).toBe('descarga')
+  })
+
+  it('no hace nada si el nuevo ya está en la sesión o la posición no existe', () => {
+    const s = enCurso(base)
+    expect(cambiarEjercicioEnSesion(s, 0, ej('curl'), [])).toBe(s)
+    expect(cambiarEjercicioEnSesion(s, 9, prensa, [])).toBe(s)
   })
 })

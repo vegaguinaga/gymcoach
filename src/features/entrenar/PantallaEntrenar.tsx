@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useEjercicios } from '../../data/repos/ejercicios'
+import { usePerfil } from '../../data/repos/perfil'
 import { useRutinaActual } from '../../data/repos/rutinas'
 import { empezarSesion, useSesionEnCurso, useSesionesTerminadas, useUltimaSesion } from '../../data/repos/sesiones'
 import { minutosEstimados } from '../../domain/generador'
@@ -16,10 +17,11 @@ export function PantallaEntrenar() {
   const ultima = useUltimaSesion()
   const ejercicios = useEjercicios()
   const historial = useSesionesTerminadas()
+  const perfil = usePerfil()
   // Sesión recién terminada: se muestra su resumen hasta tocar "Listo"
   const [terminada, setTerminada] = useState<WorkoutSession | null>(null)
 
-  if (rutina === undefined || enCurso === undefined || ultima === undefined || ejercicios === undefined || historial === undefined)
+  if (rutina === undefined || enCurso === undefined || ultima === undefined || ejercicios === undefined || historial === undefined || perfil === undefined)
     return (
       <Pantalla titulo="Entrenar">
         <p className="text-neutral-400">Cargando…</p>
@@ -29,7 +31,15 @@ export function PantallaEntrenar() {
   const nombres = new Map(ejercicios.map((e) => [e.id, e]))
 
   if (terminada) return <ResumenSesion sesion={terminada} ejercicios={nombres} alCerrar={() => setTerminada(null)} />
-  if (enCurso) return <SesionEnCurso sesion={enCurso} ejercicios={nombres} alTerminar={setTerminada} />
+  if (enCurso) return (
+      <SesionEnCurso
+        sesion={enCurso}
+        ejercicios={nombres}
+        historial={historial}
+        equipo={perfil?.equipo ?? []}
+        alTerminar={setTerminada}
+      />
+    )
 
   if (!rutina)
     return (

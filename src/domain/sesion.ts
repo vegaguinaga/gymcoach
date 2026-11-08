@@ -1,7 +1,8 @@
 // Reglas de una sesión de entrenamiento en vivo. Lógica pura: sin React ni Dexie.
 import { mejor1RM, volumen } from './fuerza'
+import { prescripcion } from './generador'
 import { sugerencia } from './progresion'
-import type { DiaRutina, Exercise, Routine, SetLog, Sugerencia, WorkoutSession } from './tipos'
+import type { DiaRutina, EjercicioPlanificado, Exercise, Routine, SetLog, Sugerencia, WorkoutSession } from './tipos'
 
 /** Día que toca: el siguiente al último entrenado de esta rutina (o el primero). */
 export function siguienteDia(rutina: Routine, ultima?: WorkoutSession | null): number {
@@ -76,6 +77,52 @@ export function nuevaSesion(
     sugerencias,
     ...(descarga && { descarga: true }),
   }
+}
+
+/**
+ * Cambia un ejercicio solo en la sesión de hoy (ej. la máquina está ocupada); la rutina no se toca.
+ * - Las series ya hechas del original se conservan (cuentan como trabajo de ese ejercicio) y su tarjeta
+ *   queda con esas series. Si no había ninguna hecha, el original desaparece de la sesión.
+ * - El nuevo va justo después, con las series que faltaban (mínimo 1), la prescripción de su tipo
+ *   y la sugerencia de peso según su historial.
+ */
+export function cambiarEjercicioEnSesion(
+  sesion: WorkoutSession,
+  posicion: number,
+  nuevo: Exercise,
+  historial: WorkoutSession[],
+): WorkoutSession {
+  const viejo = sesion.ejercicios[posicion]
+  if (!viejo || viejo.ejercicioId === nuevo.id || sesion.ejercicios.some((e) => e.ejercicioId === nuevo.id)) return sesion
+  const hechas = sesion.series.filter((s) => s.ejercicioId === viejo.ejercicioId && s.completada)
+  const pendientes = Math.max(1, viejo.series - hechas.length)
+  const planNuevo: EjercicioPlanificado = { ...prescripcion(nuevo), series: pendientes }
+  // En descarga, `sugerencia` hace la mitad de las series del plan: se le pasa el doble para que queden las pendientes
+  const sug = sugerencia(
+    { ...planNuevo, series: sesion.descarga ? pendientes * 2 : pendientes },
+    nuevo,
+    historial,
+    !!sesion.descarga,
+  )
+  const seriesNuevo = sug.reps.map((reps, i): SetLog => ({ ejercicioId: nuevo.id, serie: i + 1, kg: sug.kg, reps, completada: false }))
+
+  // Las series nuevas ocupan el lugar de la primera pendiente del original (todo lo anterior se conserva);
+  // si no había pendientes, van después de su última serie
+  const primeraPendiente = sesion.series.findIndex((s) => s.ejercicioId === viejo.ejercicioId && !s.completada)
+  const insertarEn = primeraPendiente >= 0 ? primeraPendiente : sesion.series.findLastIndex((s) => s.ejercicioId === viejo.ejercicioId) + 1 || sesion.series.length
+  const sinPendientes = sesion.series.filter((s) => s.ejercicioId !== viejo.ejercicioId || s.completada)
+  const series = [...sinPendientes.slice(0, insertarEn), ...seriesNuevo, ...sinPendientes.slice(insertarEn)]
+
+  const planesViejo = hechas.length > 0 ? [{ ...viejo, series: hechas.length }] : []
+  const ejercicios = [
+    ...sesion.ejercicios.slice(0, posicion),
+    ...planesViejo,
+    { ...planNuevo, series: seriesNuevo.length },
+    ...sesion.ejercicios.slice(posicion + 1),
+  ]
+  const sugerencias = { ...sesion.sugerencias, [nuevo.id]: sug }
+  if (hechas.length === 0) delete sugerencias[viejo.ejercicioId]
+  return { ...sesion, ejercicios, series, sugerencias }
 }
 
 /** Agrega una serie al final de un ejercicio, copiando kg y reps de su última serie. */

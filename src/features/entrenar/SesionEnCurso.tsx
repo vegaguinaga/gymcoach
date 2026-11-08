@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { descartarSesion, modificarSesion, terminarSesion } from '../../data/repos/sesiones'
 import { redondearKg } from '../../domain/unidades'
-import { agregarSerie, finDescanso, quitarSerie } from '../../domain/sesion'
-import type { EjercicioPlanificado, Exercise, SetLog, Sugerencia, TipoSugerencia, WorkoutSession } from '../../domain/tipos'
+import { opcionesDeCambio } from '../../domain/generador'
+import { agregarSerie, cambiarEjercicioEnSesion, finDescanso, quitarSerie } from '../../domain/sesion'
+import type { EjercicioPlanificado, Equipo, Exercise, SetLog, Sugerencia, TipoSugerencia, WorkoutSession } from '../../domain/tipos'
 import { AvisoSeguridad } from '../../ui/AvisoSeguridad'
+import { OpcionesCambio } from '../../ui/OpcionesCambio'
 import { Pantalla } from '../../ui/Pantalla'
 import { prepararAviso } from './aviso'
 import { BarraDescanso } from './BarraDescanso'
@@ -11,11 +13,31 @@ import { BarraDescanso } from './BarraDescanso'
 interface Props {
   sesion: WorkoutSession
   ejercicios: Map<string, Exercise>
+  historial: WorkoutSession[]
+  /** Equipo del perfil: limita las opciones al cambiar un ejercicio */
+  equipo: Equipo[]
   alTerminar: (sesion: WorkoutSession) => void
 }
 
-export function SesionEnCurso({ sesion, ejercicios, alTerminar }: Props) {
+export function SesionEnCurso({ sesion, ejercicios, historial, equipo, alTerminar }: Props) {
   const id = sesion.id as number
+  // Ejercicio cuyo selector de cambio está abierto
+  const [cambiando, setCambiando] = useState<string | null>(null)
+
+  /** Opciones para cambiar un ejercicio solo hoy (máquina ocupada): mismas reglas que en la rutina. */
+  function opciones(ejercicio: Exercise): Exercise[] {
+    const dia = { nombre: sesion.diaNombre, ejercicios: sesion.ejercicios }
+    return opcionesDeCambio(ejercicio, dia, [...ejercicios.values()], equipo.length > 0 ? equipo : [ejercicio.equipo])
+  }
+
+  async function cambiar(viejoId: string, nuevo: Exercise) {
+    await modificarSesion(id, (actual) => {
+      const posicion = actual.ejercicios.findIndex((e) => e.ejercicioId === viejoId)
+      const r = cambiarEjercicioEnSesion(actual, posicion, nuevo, historial)
+      return { ejercicios: r.ejercicios, series: r.series, sugerencias: r.sugerencias }
+    })
+    setCambiando(null)
+  }
   usePantallaEncendida()
 
   async function terminar() {
@@ -49,6 +71,10 @@ export function SesionEnCurso({ sesion, ejercicios, alTerminar }: Props) {
             ejercicio={ejercicios.get(plan.ejercicioId)}
             series={sesion.series}
             sugerencia={sesion.sugerencias?.[plan.ejercicioId]}
+            cambiando={cambiando === plan.ejercicioId}
+            alAlternarCambio={() => setCambiando(cambiando === plan.ejercicioId ? null : plan.ejercicioId)}
+            opciones={opciones}
+            alCambiar={(nuevo) => cambiar(plan.ejercicioId, nuevo)}
           />
         ))}
         <button type="button" onClick={terminar} className="min-h-14 rounded-xl bg-lime-400 text-lg font-bold text-neutral-950">
@@ -79,12 +105,20 @@ function TarjetaEjercicio({
   ejercicio,
   series,
   sugerencia,
+  cambiando,
+  alAlternarCambio,
+  opciones,
+  alCambiar,
 }: {
   id: number
   plan: EjercicioPlanificado
   ejercicio?: Exercise
   series: SetLog[]
   sugerencia?: Sugerencia
+  cambiando: boolean
+  alAlternarCambio: () => void
+  opciones: (ejercicio: Exercise) => Exercise[]
+  alCambiar: (nuevo: Exercise) => void
 }) {
   const propias = series.map((s, indice) => ({ s, indice })).filter(({ s }) => s.ejercicioId === plan.ejercicioId)
   const hechas = propias.filter(({ s }) => s.completada).length
@@ -198,7 +232,33 @@ function TarjetaEjercicio({
             − Quitar última
           </button>
         )}
+        {/* Cambiar solo hoy (máquina ocupada); no tiene sentido si ya se hicieron todas las series */}
+        {ejercicio && hechas < propias.length && (
+          <button
+            type="button"
+            onClick={alAlternarCambio}
+            aria-expanded={cambiando}
+            className={`min-h-11 flex-1 rounded-lg text-sm font-semibold ${cambiando ? 'bg-neutral-700' : 'bg-neutral-800 text-neutral-300'}`}
+          >
+            {cambiando ? 'Cerrar' : '⇄ Cambiar'}
+          </button>
+        )}
       </div>
+      {cambiando && ejercicio && (
+        <div className="mt-2">
+          <OpcionesCambio
+            titulo={
+              hechas === 0
+                ? 'Cambiar solo hoy por:'
+                : propias.length - hechas === 1
+                  ? 'Cambiar la serie que falta (solo hoy) por:'
+                  : `Cambiar las ${propias.length - hechas} series que faltan (solo hoy) por:`
+            }
+            opciones={opciones(ejercicio)}
+            alElegir={alCambiar}
+          />
+        </div>
+      )}
     </section>
   )
 }
