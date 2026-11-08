@@ -1,0 +1,79 @@
+// Copia de seguridad: exportar/importar todos los datos del usuario en un JSON. Lógica pura.
+import type { BodyWeightEntry, Profile, Routine, WorkoutSession } from './tipos'
+
+/** Versión del formato del archivo. Si cambia, `validarRespaldo` debe seguir aceptando las anteriores. */
+export const VERSION_RESPALDO = 1
+
+export interface DatosUsuario {
+  perfil: Profile[]
+  pesosCorporales: BodyWeightEntry[]
+  rutinas: Routine[]
+  sesiones: WorkoutSession[]
+}
+
+/** La biblioteca de ejercicios no se incluye: es la base de la app y se vuelve a copiar al iniciar. */
+export interface Respaldo extends DatosUsuario {
+  app: 'gymcoach'
+  version: number
+  creado: string
+}
+
+export type ResultadoValidacion = { ok: true; respaldo: Respaldo } | { ok: false; error: string }
+
+export function crearRespaldo(datos: DatosUsuario, ahora = new Date()): Respaldo {
+  return { app: 'gymcoach', version: VERSION_RESPALDO, creado: ahora.toISOString(), ...datos }
+}
+
+/** Nombre del archivo, ej. gymcoach-2026-11-08.json */
+export function nombreArchivo(ahora = new Date()): string {
+  return `gymcoach-${ahora.toISOString().slice(0, 10)}.json`
+}
+
+const esObjeto = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
+const esTexto = (v: unknown): v is string => typeof v === 'string'
+const esNumero = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
+const esIdOpcional = (v: unknown) => v === undefined || esNumero(v)
+
+const esPerfil = (v: unknown) => esObjeto(v) && v.id === 1 && Array.isArray(v.equipo) && esNumero(v.diasPorSemana)
+const esPeso = (v: unknown) => esObjeto(v) && esIdOpcional(v.id) && esTexto(v.fecha) && esNumero(v.kg)
+const esRutina = (v: unknown) => esObjeto(v) && esIdOpcional(v.id) && esTexto(v.creada) && Array.isArray(v.dias)
+const esSerie = (v: unknown) =>
+  esObjeto(v) && esTexto(v.ejercicioId) && esNumero(v.kg) && esNumero(v.reps) && typeof v.completada === 'boolean'
+const esSesion = (v: unknown) =>
+  esObjeto(v) &&
+  esIdOpcional(v.id) &&
+  esTexto(v.fecha) &&
+  (v.estado === 'en_curso' || v.estado === 'terminada') &&
+  Array.isArray(v.ejercicios) &&
+  Array.isArray(v.series) &&
+  v.series.every(esSerie)
+
+const TABLAS: { clave: keyof DatosUsuario; nombre: string; valido: (v: unknown) => boolean }[] = [
+  { clave: 'perfil', nombre: 'perfil', valido: esPerfil },
+  { clave: 'pesosCorporales', nombre: 'peso corporal', valido: esPeso },
+  { clave: 'rutinas', nombre: 'rutinas', valido: esRutina },
+  { clave: 'sesiones', nombre: 'sesiones', valido: esSesion },
+]
+
+/** Comprueba que un JSON (ya parseado) sea un respaldo de GymCoach que esta versión sabe leer. */
+export function validarRespaldo(json: unknown): ResultadoValidacion {
+  if (!esObjeto(json) || json.app !== 'gymcoach') return { ok: false, error: 'El archivo no es una copia de GymCoach.' }
+  if (!esNumero(json.version) || json.version > VERSION_RESPALDO)
+    return { ok: false, error: 'La copia es de una versión más nueva de la app. Actualiza GymCoach e inténtalo otra vez.' }
+  for (const { clave, nombre, valido } of TABLAS) {
+    const lista = json[clave]
+    if (!Array.isArray(lista)) return { ok: false, error: `Falta la sección de ${nombre}.` }
+    const mal = lista.findIndex((v) => !valido(v))
+    if (mal >= 0) return { ok: false, error: `Hay un dato dañado en ${nombre} (n.º ${mal + 1}).` }
+  }
+  const ids = (json.sesiones as WorkoutSession[]).flatMap((s) => (s.id === undefined ? [] : [s.id]))
+  if (new Set(ids).size !== ids.length) return { ok: false, error: 'Hay sesiones repetidas en el archivo.' }
+  return { ok: true, respaldo: json as unknown as Respaldo }
+}
+
+/** Cuántos datos trae un respaldo (para confirmar antes de importar). */
+export function resumenRespaldo(r: DatosUsuario): string {
+  const terminadas = r.sesiones.filter((s) => s.estado === 'terminada').length
+  const n = (c: number, uno: string, varios: string) => `${c} ${c === 1 ? uno : varios}`
+  return `${n(terminadas, 'sesión', 'sesiones')}, ${n(r.rutinas.length, 'rutina', 'rutinas')} y ${n(r.pesosCorporales.length, 'registro de peso', 'registros de peso')}`
+}

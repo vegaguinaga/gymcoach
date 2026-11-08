@@ -6,6 +6,7 @@ import { EQUIPOS, OBJETIVOS, type Equipo, type Profile } from '../../domain/tipo
 import { AvisoSeguridad } from '../../ui/AvisoSeguridad'
 import { Chip } from '../../ui/Chip'
 import { Pantalla } from '../../ui/Pantalla'
+import { TusDatos } from './TusDatos'
 
 const OPCIONES_MINUTOS = [30, 45, 60, 75, 90]
 
@@ -29,6 +30,7 @@ export function PantallaPerfil() {
           <span>📚 Biblioteca de ejercicios</span>
           <span aria-hidden="true" className="text-neutral-500">›</span>
         </a>
+        <TusDatos />
         <AvisoSeguridad />
       </div>
     </Pantalla>
