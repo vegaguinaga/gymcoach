@@ -5,6 +5,7 @@ import { FichaEjercicio } from './features/biblioteca/FichaEjercicio'
 import { PantallaBiblioteca } from './features/biblioteca/PantallaBiblioteca'
 import { PantallaPerfil } from './features/perfil/PantallaPerfil'
 import { PantallaRutina } from './features/rutina/PantallaRutina'
+import { AvisoActualizacion } from './ui/AvisoActualizacion'
 import { BarraNavegacion } from './ui/BarraNavegacion'
 import { Pantalla } from './ui/Pantalla'
 import { useRuta } from './ui/useRuta'
@@ -40,6 +41,7 @@ export default function App() {
 
   return (
     <>
+      <AvisoActualizacion />
       {contenido}
       {/* La biblioteca cuelga de Perfil: esa pestaña queda marcada */}
       <BarraNavegacion actual={ruta === 'ejercicios' ? 'perfil' : ruta} />
