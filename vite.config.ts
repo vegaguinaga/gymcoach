@@ -18,6 +18,10 @@ export default defineConfig({
         short_name: 'GymCoach',
         description: 'Tu entrenador de gym: rutinas, registro y progreso.',
         lang: 'es',
+        // id y scope fijos: el navegador reconoce la misma app aunque cambie start_url
+        id: '/',
+        scope: '/',
+        categories: ['health', 'fitness', 'sports'],
         start_url: '/#/entrenar',
         display: 'standalone',
         orientation: 'portrait',
