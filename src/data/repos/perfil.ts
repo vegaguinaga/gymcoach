@@ -8,8 +8,12 @@ export function usePerfil(): Profile | null | undefined {
   return useLiveQuery(async () => (await db.perfil.get(1)) ?? null)
 }
 
+/** Guarda el perfil del formulario. `ultimaCopia` no se edita ahí: se conserva la guardada. */
 export async function guardarPerfil(perfil: Profile): Promise<void> {
-  await db.perfil.put({ ...perfil, actualizado: new Date().toISOString() })
+  await db.transaction('rw', db.perfil, async () => {
+    const actual = await db.perfil.get(1)
+    await db.perfil.put({ ...perfil, ultimaCopia: actual?.ultimaCopia, actualizado: new Date().toISOString() })
+  })
 }
 
 /** Último peso corporal registrado (o null). */

@@ -1,12 +1,17 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import { descargarRespaldo, importarDatos } from '../../data/repos/respaldo'
-import { resumenRespaldo, validarRespaldo } from '../../domain/respaldo'
+import { usePerfil } from '../../data/repos/perfil'
+import { useSesionesTerminadas } from '../../data/repos/sesiones'
+import { necesitaCopia, resumenRespaldo, textoUltimaCopia, validarRespaldo } from '../../domain/respaldo'
 
 /** Copia de seguridad: todo vive en este dispositivo, así que conviene guardarla de vez en cuando. */
 export function TusDatos() {
   const archivo = useRef<HTMLInputElement>(null)
   const [mensaje, setMensaje] = useState<{ ok: boolean; texto: string } | null>(null)
   const [ocupado, setOcupado] = useState(false)
+  const perfil = usePerfil()
+  const sesiones = useSesionesTerminadas()
+  const pendiente = sesiones !== undefined && necesitaCopia(perfil?.ultimaCopia, sesiones)
 
   async function exportar() {
     setOcupado(true)
@@ -56,13 +61,19 @@ export function TusDatos() {
   }
 
   return (
-    <section className="flex flex-col gap-2 rounded-xl bg-neutral-900 p-4" aria-labelledby="tus-datos">
+    <section id="copia" className="flex scroll-mt-4 flex-col gap-2 rounded-xl bg-neutral-900 p-4" aria-labelledby="tus-datos">
       <h2 id="tus-datos" className="font-semibold">
         Tus datos
       </h2>
       <p className="text-sm text-neutral-400">
         Todo se guarda solo en este teléfono. Descarga una copia de vez en cuando o para pasarte a otro dispositivo.
       </p>
+      {perfil && (
+        <p className={`text-sm ${pendiente ? 'font-medium text-amber-300' : 'text-neutral-400'}`}>
+          Última copia: {textoUltimaCopia(perfil.ultimaCopia)}
+          {pendiente && ' · tienes entrenamientos sin respaldar'}
+        </p>
+      )}
       <div className="flex gap-2">
         <button
           type="button"

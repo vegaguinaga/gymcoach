@@ -48,6 +48,8 @@ export interface Profile {
   /** Equipos a los que tiene acceso */
   equipo: Equipo[]
   actualizado: string
+  /** Última vez que se exportó (o importó) una copia de seguridad (ISO) */
+  ultimaCopia?: string
 }
 
 export interface BodyWeightEntry {

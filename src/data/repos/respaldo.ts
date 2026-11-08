@@ -30,6 +30,12 @@ export async function descargarRespaldo(): Promise<void> {
   a.click()
   // Se libera después: algunos navegadores móviles leen el enlace de forma asíncrona
   setTimeout(() => URL.revokeObjectURL(url), 10_000)
+  await marcarCopia(ahora)
+}
+
+/** Recuerda cuándo se hizo la última copia (para el recordatorio). Sin perfil no hay nada que guardar. */
+async function marcarCopia(ahora = new Date()): Promise<void> {
+  await db.perfil.update(1, { ultimaCopia: ahora.toISOString() })
 }
 
 /**
@@ -45,4 +51,6 @@ export async function importarDatos(respaldo: Respaldo): Promise<void> {
     await db.rutinas.bulkPut(respaldo.rutinas)
     await db.sesiones.bulkPut(respaldo.sesiones)
   })
+  // Los datos actuales son ahora los de un archivo que el usuario ya tiene guardado
+  await marcarCopia()
 }

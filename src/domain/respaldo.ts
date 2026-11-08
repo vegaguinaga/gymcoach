@@ -77,3 +77,28 @@ export function resumenRespaldo(r: DatosUsuario): string {
   const n = (c: number, uno: string, varios: string) => `${c} ${c === 1 ? uno : varios}`
   return `${n(terminadas, 'sesión', 'sesiones')}, ${n(r.rutinas.length, 'rutina', 'rutinas')} y ${n(r.pesosCorporales.length, 'registro de peso', 'registros de peso')}`
 }
+
+const DIA_MS = 86_400_000
+/** Días desde la última copia a partir de los cuales se recuerda hacer otra (si hay sesiones nuevas). */
+export const DIAS_ENTRE_COPIAS = 14
+/** Sin ninguna copia, se avisa a partir de estas sesiones terminadas. */
+export const SESIONES_SIN_COPIA = 3
+
+/**
+ * ¿Conviene recordar la copia? Solo si hay entrenamientos que se perderían:
+ * nunca hubo copia y ya hay varias sesiones, o la última tiene 14+ días y hay sesiones posteriores.
+ */
+export function necesitaCopia(ultimaCopia: string | undefined, sesiones: WorkoutSession[], ahora = new Date()): boolean {
+  const terminadas = sesiones.filter((s) => s.estado === 'terminada')
+  if (!ultimaCopia) return terminadas.length >= SESIONES_SIN_COPIA
+  const nuevas = terminadas.some((s) => (s.fin ?? s.fecha) > ultimaCopia)
+  return nuevas && ahora.getTime() - Date.parse(ultimaCopia) >= DIAS_ENTRE_COPIAS * DIA_MS
+}
+
+/** "Nunca", "hoy", "ayer" o "hace N días" (por días de calendario locales). */
+export function textoUltimaCopia(ultimaCopia: string | undefined, ahora = new Date()): string {
+  if (!ultimaCopia) return 'nunca'
+  const dia = (d: Date) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())
+  const dias = Math.max(0, Math.round((dia(ahora) - dia(new Date(ultimaCopia))) / DIA_MS))
+  return dias === 0 ? 'hoy' : dias === 1 ? 'ayer' : `hace ${dias} días`
+}

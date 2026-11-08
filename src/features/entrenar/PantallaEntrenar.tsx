@@ -5,6 +5,7 @@ import { useRutinaActual } from '../../data/repos/rutinas'
 import { empezarSesion, useSesionEnCurso, useSesionesTerminadas, useUltimaSesion } from '../../data/repos/sesiones'
 import { minutosEstimados } from '../../domain/generador'
 import { estadoDescarga, type EstadoDescarga } from '../../domain/progresion'
+import { necesitaCopia } from '../../domain/respaldo'
 import { siguienteDia } from '../../domain/sesion'
 import type { Exercise, Routine, WorkoutSession } from '../../domain/tipos'
 import { Pantalla } from '../../ui/Pantalla'
@@ -63,6 +64,7 @@ export function PantallaEntrenar() {
       sugerido={siguienteDia(rutina, ultima)}
       descarga={estadoDescarga(historial, compuestos)}
       ejercicios={nombres}
+      avisoCopia={necesitaCopia(perfil?.ultimaCopia, historial)}
     />
   )
 }
@@ -72,9 +74,11 @@ interface PropsSelector {
   sugerido: number
   descarga: EstadoDescarga
   ejercicios: Map<string, Exercise>
+  /** Hay entrenamientos sin copia de seguridad */
+  avisoCopia: boolean
 }
 
-function SelectorDia({ rutina, sugerido, descarga, ejercicios }: PropsSelector) {
+function SelectorDia({ rutina, sugerido, descarga, ejercicios, avisoCopia }: PropsSelector) {
   const [elegido, setElegido] = useState(sugerido)
   const [empezando, setEmpezando] = useState(false)
   const hayAviso = descarga.activa || descarga.recomendada
@@ -91,6 +95,14 @@ function SelectorDia({ rutina, sugerido, descarga, ejercicios }: PropsSelector) 
 
   return (
     <Pantalla titulo="Entrenar">
+      {avisoCopia && (
+        <a
+          href="#/perfil"
+          className="mb-4 flex min-h-12 items-center gap-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2 text-sm text-amber-100"
+        >
+          💾 Tus entrenamientos solo están en este teléfono. <span className="font-semibold underline">Haz una copia</span>
+        </a>
+      )}
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-neutral-300">¿Qué día entrenas hoy?</legend>
         {rutina.dias.map((dia, i) => (
