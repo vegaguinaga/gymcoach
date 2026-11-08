@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { sincronizarBiblioteca } from './data/repos/ejercicios'
 import { PantallaEntrenar } from './features/entrenar/PantallaEntrenar'
 import { FichaEjercicio } from './features/biblioteca/FichaEjercicio'
@@ -9,10 +9,8 @@ import { BarraNavegacion } from './ui/BarraNavegacion'
 import { Pantalla } from './ui/Pantalla'
 import { useRuta } from './ui/useRuta'
 
-// Pantallas provisionales: cada fase las irá reemplazando por las reales
-const PROVISIONAL = {
-  progreso: { titulo: 'Progreso', texto: 'Aquí verás tu historial y gráficas (fase 4).' },
-}
+// Carga diferida: Progreso usa Recharts (~100 KB), que solo se descarga al abrir esa pestaña
+const PantallaProgreso = lazy(() => import('./features/progreso/PantallaProgreso'))
 
 export default function App() {
   const { ruta, param } = useRuta()
@@ -29,9 +27,15 @@ export default function App() {
     contenido = param ? <FichaEjercicio id={param} /> : <PantallaBiblioteca />
   else
     contenido = (
-      <Pantalla titulo={PROVISIONAL[ruta].titulo}>
-        <p className="text-neutral-400">{PROVISIONAL[ruta].texto}</p>
-      </Pantalla>
+      <Suspense
+        fallback={
+          <Pantalla titulo="Progreso">
+            <p className="text-neutral-400">Cargando…</p>
+          </Pantalla>
+        }
+      >
+        <PantallaProgreso param={param} />
+      </Suspense>
     )
 
   return (

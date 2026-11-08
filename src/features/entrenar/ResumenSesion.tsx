@@ -1,3 +1,5 @@
+import { useSesionesTerminadas } from '../../data/repos/sesiones'
+import { recordsNuevos } from '../../domain/progreso'
 import { resumenSesion } from '../../domain/sesion'
 import type { Exercise, WorkoutSession } from '../../domain/tipos'
 import { Pantalla } from '../../ui/Pantalla'
@@ -10,6 +12,8 @@ interface Props {
 
 export function ResumenSesion({ sesion, ejercicios, alCerrar }: Props) {
   const r = resumenSesion(sesion)
+  const historial = useSesionesTerminadas()
+  const records = historial ? recordsNuevos(sesion, historial) : []
   const datos = [
     { etiqueta: 'Duración', valor: `${r.minutos} min` },
     { etiqueta: 'Series', valor: `${r.seriesCompletadas}/${r.seriesTotales}` },
@@ -28,6 +32,23 @@ export function ResumenSesion({ sesion, ejercicios, alCerrar }: Props) {
             </div>
           ))}
         </dl>
+
+        {records.length > 0 && (
+          <section className="rounded-xl border border-lime-400/40 bg-neutral-900 p-4">
+            <h2 className="mb-2 font-semibold">🏆 ¡Nuevo récord!</h2>
+            <ul className="text-sm">
+              {records.map((rec) => (
+                <li key={`${rec.ejercicioId}-${rec.tipo}`} className="flex justify-between py-1">
+                  <span>{ejercicios.get(rec.ejercicioId)?.nombre ?? rec.ejercicioId}</span>
+                  <span className="tabular-nums">
+                    {rec.tipo === 'unoRM' ? '1RM ' : ''}
+                    {rec.texto}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {r.mejores.length > 0 && (
           <section className="rounded-xl bg-neutral-900 p-4">

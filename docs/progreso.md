@@ -1,6 +1,14 @@
 # Progreso de GymCoach
 
-## Estado actual: Fase 3 completada (2026-11-08)
+## Estado actual: Fase 4 completada (2026-11-08)
+- Dominio: `src/domain/progreso.ts` (con tests): `historialEjercicio` (1RM, volumen y mejor serie por sesión), `recordsPorEjercicio` (mayor 1RM y mejor kg × reps; en peso corporal, más reps), `recordsNuevos` (la primera vez que se hace un ejercicio no cuenta; igualar tampoco), `ejerciciosRealizados`, `sesionesEnDias`.
+- Datos: sin cambio de esquema (Dexie sigue en **v3**). Hooks nuevos: `useSesionesTerminadas`, `useSesion`, `borrarSesion` y `usePesosCorporales`.
+- Pantalla Progreso (`src/features/progreso/`), cargada con `lazy()`: resumen (sesiones en 7 y 30 días, ejercicios con récord) y 3 secciones: Historial (detalle en `#/progreso/<id>`, se puede borrar), Ejercicios (selector, chips 1RM/Volumen/Reps, récords, últimas 5 sesiones) y Peso.
+- `GraficaLinea.tsx`: Recharts con una sola serie por gráfica (sin doble eje). Para peso corporal sin lastre solo se muestran reps.
+- Resumen de Entrenar: tarjeta "🏆 ¡Nuevo récord!".
+- Build: JS inicial ≈ 117 KB gzip; chunk de Progreso (Recharts) ≈ 108 KB gzip, se descarga solo al abrir la pestaña.
+
+## Fase 3 (2026-11-08)
 - Dominio: `src/domain/fuerza.ts` (Epley 1–12 reps, volumen, mejor 1RM) y `src/domain/sesion.ts` (día que toca, series iniciales con kg/reps de la última vez, agregar/quitar serie, temporizador, resumen). Con tests.
 - `WorkoutSession` ahora guarda `estado` (en_curso | terminada), `diaIndice`, `fin`, `descansoHasta` y una copia del plan del día (`ejercicios`).
 - Dexie **versión 3**: tabla `sesiones` ('++id, fecha, estado'). La sesión en curso se guarda en cada cambio con `modificarSesion` (transacción sobre lo último guardado: evita pisar cambios).
@@ -35,9 +43,9 @@
 - Primer test de dominio: `redondearKg` (`src/domain/unidades.ts`).
 - Build: JS inicial ≈ 69 KB gzip.
 
-## Siguiente: Fase 4
-Progreso: historial de sesiones, gráficas con Recharts (1RM estimado y volumen por ejercicio, peso corporal) y récords personales.
-Después: sugerencia de peso con doble progresión y descargas; cambiar un ejercicio de la rutina por una alternativa.
+## Siguiente: Fase 5
+Sugerencia de peso con doble progresión y descargas; cambiar un ejercicio de la rutina por una alternativa.
+Pendiente: vite-plugin-pwa aún no está instalado (al hacerlo, incluir el chunk de Progreso en el precache).
 
 ## Notas
 - Node se instaló con nvm: en shells no interactivos hay que cargar `~/.nvm/nvm.sh` antes de `npm`.
