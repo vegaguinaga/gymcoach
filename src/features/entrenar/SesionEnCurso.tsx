@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { descartarSesion, modificarSesion, terminarSesion } from '../../data/repos/sesiones'
 import { redondearKg } from '../../domain/unidades'
+import { seriesCalentamiento } from '../../domain/calentamiento'
 import { opcionesDeCambio } from '../../domain/generador'
 import { agregarSerie, cambiarEjercicioEnSesion, finDescanso, quitarSerie } from '../../domain/sesion'
 import type { EjercicioPlanificado, Equipo, Exercise, SetLog, Sugerencia, TipoSugerencia, WorkoutSession } from '../../domain/tipos'
@@ -123,6 +124,8 @@ function TarjetaEjercicio({
   const propias = series.map((s, indice) => ({ s, indice })).filter(({ s }) => s.ejercicioId === plan.ejercicioId)
   const hechas = propias.filter(({ s }) => s.completada).length
   const pesoCorporal = ejercicio?.equipo === 'peso_corporal'
+  // Aproximación según el peso de la primera serie; solo antes de empezar el ejercicio
+  const calentamiento = hechas === 0 ? seriesCalentamiento(propias[0]?.s.kg ?? 0, ejercicio) : []
 
   const cambiarSerie = (indice: number, cambios: Partial<SetLog>) =>
     modificarSesion(id, (actual) => ({
@@ -155,6 +158,22 @@ function TarjetaEjercicio({
           {hechas}/{propias.length}
         </span>
       </header>
+
+      {calentamiento.length > 0 && (
+        <details className="mb-3 rounded-lg bg-neutral-950/60 px-3 text-sm">
+          <summary className="flex min-h-11 cursor-pointer items-center font-medium text-orange-300">
+            🔥 Calentamiento ({calentamiento.length} {calentamiento.length === 1 ? 'serie' : 'series'})
+          </summary>
+          <ul className="pb-3 tabular-nums text-neutral-300">
+            {calentamiento.map((c) => (
+              <li key={c.kg}>
+                {c.kg} kg × {c.reps}
+              </li>
+            ))}
+          </ul>
+          <p className="pb-3 text-xs text-neutral-500">Sin llegar al cansancio y con poco descanso. No hace falta registrarlas.</p>
+        </details>
+      )}
 
       <div className="grid grid-cols-[1.5rem_1fr_1fr_4.5rem_2.75rem] items-center gap-2 text-xs text-neutral-400">
         <span>#</span>
