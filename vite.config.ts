@@ -3,8 +3,12 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vitest/config'
 
+// Ruta base: '/' en local; en GitHub Pages la app vive en /gymcoach/ (BASE_PATH lo fija el workflow)
+const base = process.env.BASE_PATH ?? '/'
+
 // Configuración de Vite (build) y Vitest (tests) en un solo archivo
 export default defineConfig({
+  base,
   plugins: [
     react(),
     tailwindcss(),
@@ -19,10 +23,10 @@ export default defineConfig({
         description: 'Tu entrenador de gym: rutinas, registro y progreso.',
         lang: 'es',
         // id y scope fijos: el navegador reconoce la misma app aunque cambie start_url
-        id: '/',
-        scope: '/',
+        id: base,
+        scope: base,
         categories: ['health', 'fitness', 'sports'],
-        start_url: '/#/entrenar',
+        start_url: `${base}#/entrenar`,
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#0a0a0a',
