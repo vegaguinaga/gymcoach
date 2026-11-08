@@ -1,6 +1,13 @@
 # Progreso de GymCoach
 
-## Estado actual: Fase 9 completada (2026-11-08) · v0.9.0
+## Estado actual: Fase 10 completada (2026-11-08) · v0.10.0
+- **Limpieza**: fuera los `.gitkeep` sobrantes. `seriesPorGrupo` se movió a `src/domain/volumen.ts`, donde ahora sí se usa.
+- **Volumen semanal**: `volumen.ts` (`seriesPorGrupo`, `seriesHechasSemana` desde el lunes, `volumenSemanal`, `rangoSemanal`; con tests). El grupo principal cuenta 1 serie y cada secundario 0.5. Rango: 10–16 en grupos grandes y 6–16 en bíceps, tríceps, gemelos y core. `src/ui/VolumenSemanal.tsx`: desplegable «📊 Volumen semanal» en Rutina (con estado y consejo) y chip «Volumen» en Progreso (hecho frente a planificado).
+- **Por tiempo**: `src/domain/medida.ts` (`EJERCICIOS_POR_TIEMPO` = plancha; reemplaza a `NO_PRESCRIBIBLES`). En estos ejercicios **`reps` guarda segundos** (SetLog, repsMin/repsMax, sugerencias), así que no hubo cambio de esquema. Prescripción 3 × 20–45 s RPE 8 con 60 s de descanso; el editor va de 10 a 180 s en pasos de 5; al editar una sesión se aceptan hasta 600 s. Progresión: +5 s; con lastre al tope sube kg. No cuenta para el 1RM ni para el volumen; el récord es el mayor tiempo. La plancha es la 1.ª opción de `CORE`. UI: `CronometroSerie.tsx` (▶, avisa al llegar al objetivo y ⏹ guarda y marca la serie), columnas «Seg» y gráfica «Mejor tiempo».
+- **Medidas**: `BodyMeasurement { fecha, cm: {cintura, cadera, pecho, brazo, muslo} }` y **Dexie v4** con la tabla `medidas` ('++id, fecha'). `medidas.ts` (con tests): validación de 10–250 cm y resumen con cambios. `repos/medidas.ts`: un registro por día local (se combina si mides dos veces). Progreso › «Cuerpo» (antes «Peso»): peso + `Medidas.tsx` (formulario, tarjetas, gráfica por zona y borrar el último). Copia de seguridad **v2** con `medidas`; las v1 se importan con medidas vacías.
+- Dexie **v4**. 174 tests. Build: JS inicial ≈ 129 KB gzip; precache de 100 archivos (1.8 MB).
+
+## Fase 9 (2026-11-08)
 - **Cambiar fecha**: `cambiarFecha` y `fechaLocal` en `edicionSesion.ts` (con tests). Conserva la hora y la duración y no acepta días futuros; si hoy quedaría en el futuro, termina ahora. «📅 Cambiar fecha» en el detalle del historial (`cambiarFechaSesion`).
 - **Sesión olvidada**: `sesionOlvidada` en `sesion.ts` (con tests). Queda terminada, sin `sugerencias`. Las series vienen con lo sugerido según el historial **anterior** a esa fecha y **sin marcar**. Duración 10–240 min y nunca termina después de ahora. «➕ Registrar sesión olvidada» en Historial (`SesionOlvidada.tsx`) pide día, fecha, hora y duración y después abre el detalle. Una sesión sin series hechas se abre directamente en modo edición.
 - **Días de la rutina**: `agregarDia` (copia de otro, al final, máximo 7; mantiene el nombre, así que cambia junto a su original) y `quitarDia` (queda al menos 1) en `edicionRutina.ts` (con tests). «Añadir un día» al final de Rutina y «Quitar este día» en el modo edición de cada día. `siguienteDia` va en ciclo, así que sigue funcionando.
@@ -82,8 +89,8 @@
 - Primer test de dominio: `redondearKg` (`src/domain/unidades.ts`).
 - Build: JS inicial ≈ 69 KB gzip.
 
-## Siguiente: Fase 10
-Por definir. Pendiente: probar la instalación y las pantallas nuevas en un teléfono real (iOS/Android). Hay código muerto por confirmar: `seriesPorGrupo` en `generador.ts` y los `.gitkeep` de carpetas que ya tienen archivos. Revisar `npm audit` cuando salga una versión nueva de vite-plugin-pwa/workbox.
+## Siguiente: Fase 11
+Por definir. Pendiente: probar la instalación y las pantallas nuevas en un teléfono real (iOS/Android), sobre todo el cronómetro de la plancha y el formulario de medidas. Revisar `npm audit` cuando salga una versión nueva de vite-plugin-pwa/workbox. Si se añaden más isométricos, solo hay que sumarlos a `EJERCICIOS_POR_TIEMPO` y a la biblioteca.
 
 ## Notas
 - Node se instaló con nvm: en shells no interactivos hay que cargar `~/.nvm/nvm.sh` antes de `npm`.
