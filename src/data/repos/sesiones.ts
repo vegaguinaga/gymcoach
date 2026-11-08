@@ -16,12 +16,16 @@ export function useUltimaSesion(): WorkoutSession | null | undefined {
   })
 }
 
-/** Empieza el día indicado. Si ya había una sesión en curso, la devuelve en vez de crear otra. */
-export async function empezarSesion(rutina: Routine, diaIndice: number): Promise<void> {
-  await db.transaction('rw', db.sesiones, async () => {
+/**
+ * Empieza el día indicado con las sugerencias de progresión (o en modo descarga).
+ * Si ya había una sesión en curso, no crea otra.
+ */
+export async function empezarSesion(rutina: Routine, diaIndice: number, descarga = false): Promise<void> {
+  await db.transaction('rw', db.sesiones, db.ejercicios, async () => {
     if (await db.sesiones.where('estado').equals('en_curso').count()) return
     const historial = await db.sesiones.where('estado').equals('terminada').toArray()
-    await db.sesiones.add(nuevaSesion(rutina, diaIndice, historial))
+    const ejercicios = await db.ejercicios.toArray()
+    await db.sesiones.add(nuevaSesion(rutina, diaIndice, historial, { ejercicios, descarga }))
   })
 }
 

@@ -15,3 +15,9 @@ export async function guardarRutina(rutina: Routine): Promise<void> {
   const { id: _id, ...sinId } = rutina
   await db.rutinas.add(sinId)
 }
+
+/** Guarda cambios en una rutina existente (ej. cambiar un ejercicio). Las sesiones guardan su propia copia del plan. */
+export async function actualizarRutina(rutina: Routine): Promise<void> {
+  if (rutina.id === undefined) return
+  await db.rutinas.put(rutina)
+}
