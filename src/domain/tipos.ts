@@ -83,18 +83,30 @@ export interface Routine {
 
 export interface SetLog {
   ejercicioId: string
+  /** Número de serie dentro del ejercicio (1, 2, 3…) */
   serie: number
+  /** Kg en la barra/mancuerna; en ejercicios de peso corporal, el lastre extra (0 = sin lastre) */
   kg: number
   reps: number
   rpe?: number
   completada: boolean
 }
 
+export type EstadoSesion = 'en_curso' | 'terminada'
+
 export interface WorkoutSession {
   id?: number
+  /** Inicio de la sesión (ISO) */
   fecha: string
+  fin?: string
+  estado: EstadoSesion
   rutinaId?: number
+  diaIndice?: number
   diaNombre: string
+  /** Copia del plan del día (series, reps objetivo, descanso) al empezar */
+  ejercicios: EjercicioPlanificado[]
   series: SetLog[]
+  /** Fin del descanso en curso (ISO); así el temporizador sobrevive a recargar la app */
+  descansoHasta?: string
   notas?: string
 }
