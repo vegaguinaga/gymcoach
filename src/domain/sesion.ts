@@ -1,6 +1,7 @@
 // Reglas de una sesión de entrenamiento en vivo. Lógica pura: sin React ni Dexie.
 import { mejor1RM, volumen } from './fuerza'
-import type { DiaRutina, Routine, SetLog, WorkoutSession } from './tipos'
+import { sugerencia } from './progresion'
+import type { DiaRutina, Exercise, Routine, SetLog, Sugerencia, WorkoutSession } from './tipos'
 
 /** Día que toca: el siguiente al último entrenado de esta rutina (o el primero). */
 export function siguienteDia(rutina: Routine, ultima?: WorkoutSession | null): number {
@@ -18,24 +19,41 @@ export function ultimasSeries(ejercicioId: string, historial: WorkoutSession[]):
   return []
 }
 
+/** Sugerencia de progresión para cada ejercicio del día (clave: ejercicioId). */
+export function sugerenciasDia(
+  dia: DiaRutina,
+  historial: WorkoutSession[],
+  ejercicios: Exercise[] = [],
+  descarga = false,
+): Record<string, Sugerencia> {
+  const porId = new Map(ejercicios.map((e) => [e.id, e]))
+  return Object.fromEntries(
+    dia.ejercicios.map((plan) => [plan.ejercicioId, sugerencia(plan, porId.get(plan.ejercicioId), historial, descarga)]),
+  )
+}
+
 /**
- * Series de un día listas para entrenar: con los kg y reps de la última vez que se hizo
- * cada ejercicio. Si es nuevo: 0 kg y el mínimo de reps (empezar liviano).
+ * Series de un día listas para entrenar, con los kg y reps sugeridos (doble progresión).
+ * Si el ejercicio es nuevo: 0 kg y el mínimo de reps (empezar liviano).
+ * En descarga: la mitad de las series y el mismo peso.
  */
-export function seriesIniciales(dia: DiaRutina, historial: WorkoutSession[]): SetLog[] {
+export function seriesIniciales(
+  dia: DiaRutina,
+  historial: WorkoutSession[],
+  ejercicios: Exercise[] = [],
+  descarga = false,
+  sugerencias = sugerenciasDia(dia, historial, ejercicios, descarga),
+): SetLog[] {
   return dia.ejercicios.flatMap((plan) => {
-    const previas = ultimasSeries(plan.ejercicioId, historial)
-    return Array.from({ length: plan.series }, (_, i): SetLog => {
-      const ref = previas[Math.min(i, previas.length - 1)]
-      return {
-        ejercicioId: plan.ejercicioId,
-        serie: i + 1,
-        kg: ref?.kg ?? 0,
-        reps: ref?.reps ?? plan.repsMin,
-        completada: false,
-      }
-    })
+    const sug = sugerencias[plan.ejercicioId]
+    return sug.reps.map((reps, i): SetLog => ({ ejercicioId: plan.ejercicioId, serie: i + 1, kg: sug.kg, reps, completada: false }))
   })
+}
+
+export interface OpcionesSesion {
+  ejercicios?: Exercise[]
+  descarga?: boolean
+  ahora?: Date
 }
 
 /** Crea una sesión nueva en curso para el día indicado de la rutina. */
@@ -43,17 +61,20 @@ export function nuevaSesion(
   rutina: Routine,
   diaIndice: number,
   historial: WorkoutSession[],
-  ahora = new Date(),
+  { ejercicios = [], descarga = false, ahora = new Date() }: OpcionesSesion = {},
 ): WorkoutSession {
   const dia = rutina.dias[diaIndice]
+  const sugerencias = sugerenciasDia(dia, historial, ejercicios, descarga)
   return {
     fecha: ahora.toISOString(),
     estado: 'en_curso',
     rutinaId: rutina.id,
     diaIndice,
     diaNombre: dia.nombre,
-    ejercicios: dia.ejercicios.map((e) => ({ ...e })),
-    series: seriesIniciales(dia, historial),
+    ejercicios: dia.ejercicios.map((e) => ({ ...e, series: sugerencias[e.ejercicioId].reps.length })),
+    series: seriesIniciales(dia, historial, ejercicios, descarga, sugerencias),
+    sugerencias,
+    ...(descarga && { descarga: true }),
   }
 }
 

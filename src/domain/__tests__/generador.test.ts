@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
   ajustarATiempo,
+  cambiarEjercicio,
   cardioSugerido,
   diasEfectivos,
   generarRutina,
   minutosEstimados,
+  opcionesDeCambio,
   plantillasPara,
   seriesDisponibles,
 } from '../generador'
@@ -147,5 +149,35 @@ describe('tiempo', () => {
     expect(ajustarATiempo(lista, comp, 4)).toEqual([p('c1', 2), p('c2', 2)])
     expect(ajustarATiempo(lista, comp, 0)).toHaveLength(2)
     expect(lista[0].series).toBe(3) // no muta la entrada
+  })
+})
+
+describe('cambiar un ejercicio de la rutina', () => {
+  const p = perfil({ diasPorSemana: 3, minutosPorSesion: 90, equipo: ['gym', 'mancuernas', 'peso_corporal'] })
+  const rutina = { ...generarRutina(p, biblioteca), id: 1 }
+
+  it('opcionesDeCambio: alternativas primero, con el equipo del perfil y sin repetir el día', () => {
+    const dia = rutina.dias[0]
+    const actual = porId.get(dia.ejercicios[1].ejercicioId)!
+    const opciones = opcionesDeCambio(actual, dia, biblioteca, ['mancuernas', 'peso_corporal'])
+    expect(opciones.length).toBeGreaterThan(0)
+    expect(opciones.every((e) => e.equipo !== 'gym' && e.id !== 'plancha')).toBe(true)
+    expect(opciones.some((e) => dia.ejercicios.some((x) => x.ejercicioId === e.id))).toBe(false)
+    expect(new Set(opciones.map((e) => e.id)).size).toBe(opciones.length)
+    const primeraAlt = actual.alternativas.map((id) => porId.get(id)!).find((e) => opciones.includes(e))
+    if (primeraAlt) expect(opciones[0]).toBe(primeraAlt)
+  })
+
+  it('cambia en todos los días con el mismo nombre, conserva series y ajusta la prescripción', () => {
+    expect(rutina.dias[0].nombre).toBe(rutina.dias[2].nombre)
+    const viejo = rutina.dias[0].ejercicios[0]
+    const nuevo = porId.get('curl_barra')!
+    const r = cambiarEjercicio(rutina, 0, 0, nuevo)
+    for (const i of [0, 2]) {
+      expect(r.dias[i].ejercicios[0]).toMatchObject({ ejercicioId: 'curl_barra', series: viejo.series, repsMin: 10, repsMax: 15 })
+    }
+    expect(r.dias[1]).toEqual(rutina.dias[1])
+    expect(rutina.dias[0].ejercicios[0].ejercicioId).toBe(viejo.ejercicioId) // no muta
+    expect(cambiarEjercicio(rutina, 0, 99, nuevo)).toBe(rutina)
   })
 })

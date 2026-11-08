@@ -92,6 +92,19 @@ export interface SetLog {
   completada: boolean
 }
 
+export type TipoSugerencia = 'subir' | 'mantener' | 'bajar' | 'nuevo' | 'descarga'
+
+/** Sugerencia de progresión para un ejercicio, calculada al empezar la sesión (fase 5). */
+export interface Sugerencia {
+  tipo: TipoSugerencia
+  /** Kg propuestos para todas las series (en peso corporal: el lastre) */
+  kg: number
+  /** Reps objetivo por serie; su largo es el número de series a hacer */
+  reps: number[]
+  /** Texto corto para mostrar en la tarjeta del ejercicio */
+  texto: string
+}
+
 export type EstadoSesion = 'en_curso' | 'terminada'
 
 export interface WorkoutSession {
@@ -109,4 +122,8 @@ export interface WorkoutSession {
   /** Fin del descanso en curso (ISO); así el temporizador sobrevive a recargar la app */
   descansoHasta?: string
   notas?: string
+  /** Sesión de una semana de descarga (no cuenta para la progresión) */
+  descarga?: boolean
+  /** Sugerencia por ejercicio (clave: ejercicioId) */
+  sugerencias?: Record<string, Sugerencia>
 }

@@ -64,10 +64,10 @@ describe('series iniciales', () => {
     expect(ultimasSeries('curl', historial)).toEqual([])
   })
 
-  it('rellena con lo de la última vez y repite la última serie si ahora hay más', () => {
+  it('rellena con la sugerencia: mismo peso y +1 rep (repite la última serie si ahora hay más)', () => {
     const s = seriesIniciales(diaA, historial)
     expect(s.filter((x) => x.ejercicioId === 'sentadilla').map((x) => [x.serie, x.kg, x.reps])).toEqual([
-      [1, 45, 8], [2, 45, 8], [3, 45, 8],
+      [1, 45, 9], [2, 45, 9], [3, 45, 9],
     ])
     expect(s.every((x) => !x.completada)).toBe(true)
   })
@@ -78,11 +78,20 @@ describe('series iniciales', () => {
   })
 
   it('nuevaSesion copia el plan del día y queda en curso', () => {
-    const s = nuevaSesion(rutina, 0, [], new Date('2026-02-01T09:00:00Z'))
+    const s = nuevaSesion(rutina, 0, [], { ahora: new Date('2026-02-01T09:00:00Z') })
     expect(s).toMatchObject({ estado: 'en_curso', rutinaId: 7, diaIndice: 0, diaNombre: 'A', fecha: '2026-02-01T09:00:00.000Z' })
     expect(s.series).toHaveLength(5)
+    expect(s.sugerencias?.sentadilla.tipo).toBe('nuevo')
+    expect(s.descarga).toBeUndefined()
     s.ejercicios[0].series = 99
     expect(diaA.ejercicios[0].series).toBe(3)
+  })
+
+  it('nuevaSesion en descarga: la mitad de las series en el plan copiado y en las series', () => {
+    const s = nuevaSesion(rutina, 0, historial, { descarga: true })
+    expect(s.descarga).toBe(true)
+    expect(s.ejercicios.map((e) => e.series)).toEqual([2, 1])
+    expect(s.series.filter((x) => x.ejercicioId === 'sentadilla').map((x) => x.kg)).toEqual([45, 45])
   })
 })
 

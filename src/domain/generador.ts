@@ -1,5 +1,5 @@
 // Generador de rutinas para principiantes. Lógica pura: recibe perfil y biblioteca, devuelve una Routine.
-import type { DiaRutina, EjercicioPlanificado, Exercise, GrupoMuscular, Profile, Routine } from './tipos'
+import type { DiaRutina, EjercicioPlanificado, Equipo, Exercise, GrupoMuscular, Profile, Routine } from './tipos'
 
 export const MINUTOS_POR_SERIE = 2.5
 export const MINUTOS_CALENTAMIENTO = 5
@@ -203,4 +203,53 @@ export function seriesPorGrupo(rutina: Routine, ejercicios: Exercise[]): Record<
       for (const g of ej.gruposSecundarios) conteo[g] = (conteo[g] ?? 0) + p.series / 2
     }
   return conteo
+}
+
+// --- Cambiar un ejercicio de la rutina (fase 5) ---
+
+/** Ejercicios que se miden en segundos: no entran en la rutina (todo se prescribe en reps). */
+const NO_PRESCRIBIBLES = new Set(['plancha'])
+
+/**
+ * Opciones para reemplazar un ejercicio del día: primero sus alternativas y después otros del mismo grupo
+ * principal, siempre con el equipo del perfil y sin repetir uno que ya esté en el día.
+ */
+export function opcionesDeCambio(
+  actual: Exercise,
+  dia: DiaRutina,
+  ejercicios: Exercise[],
+  equipo: Equipo[],
+): Exercise[] {
+  const porId = new Map(ejercicios.map((e) => [e.id, e]))
+  const enDia = new Set(dia.ejercicios.map((p) => p.ejercicioId))
+  const candidatos = [
+    ...actual.alternativas.flatMap((id) => porId.get(id) ?? []),
+    ...ejercicios.filter((e) => e.grupoPrincipal === actual.grupoPrincipal),
+  ]
+  const vistos = new Set<string>()
+  return candidatos.filter((e) => {
+    if (vistos.has(e.id) || enDia.has(e.id) || NO_PRESCRIBIBLES.has(e.id) || !equipo.includes(e.equipo)) return false
+    vistos.add(e.id)
+    return true
+  })
+}
+
+/**
+ * Cambia el ejercicio en la posición indicada por otro. Se aplica a todos los días con el mismo nombre
+ * (ej. Full Body A se repite en 3 días). Conserva las series (el tiempo de la sesión no cambia) y ajusta
+ * reps, RPE y descanso al tipo del ejercicio nuevo.
+ */
+export function cambiarEjercicio(rutina: Routine, diaIndice: number, posicion: number, nuevo: Exercise): Routine {
+  const dia = rutina.dias[diaIndice]
+  const viejo = dia?.ejercicios[posicion]
+  if (!viejo) return rutina
+  const reemplazo: EjercicioPlanificado = { ...prescripcion(nuevo), series: viejo.series }
+  return {
+    ...rutina,
+    dias: rutina.dias.map((d) =>
+      d.nombre !== dia.nombre || d.ejercicios[posicion]?.ejercicioId !== viejo.ejercicioId
+        ? d
+        : { ...d, ejercicios: d.ejercicios.map((e, i) => (i === posicion ? { ...reemplazo } : e)) },
+    ),
+  }
 }
