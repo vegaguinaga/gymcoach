@@ -16,6 +16,12 @@ export function DetalleSesion({ id, ejercicios }: { id: number; ejercicios: Map<
   // Copia de las series mientras se edita (null = solo lectura)
   const [borrador, setBorrador] = useState<SetLog[] | null>(null)
   const [guardando, setGuardando] = useState(false)
+  // Una sesión sin ninguna serie hecha (ej. recién registrada como olvidada) se abre lista para editar
+  const [revisada, setRevisada] = useState(false)
+  if (!revisada && sesion?.estado === 'terminada') {
+    setRevisada(true)
+    if (sesion.series.length > 0 && sesion.series.every((s) => !s.completada)) setBorrador(sesion.series)
+  }
 
   if (sesion === undefined || todas === undefined)
     return (
@@ -72,7 +78,9 @@ export function DetalleSesion({ id, ejercicios }: { id: number; ejercicios: Map<
 
         {borrador && (
           <p className="rounded-xl bg-lime-400/10 p-3 text-sm text-lime-200">
-            Corrige lo que anotaste mal. Los récords y las sugerencias se recalculan al guardar.
+            {sesion.series.some((s) => s.completada)
+              ? 'Corrige lo que anotaste mal. Los récords y las sugerencias se recalculan al guardar.'
+              : 'Marca con ✓ las series que hiciste y ajusta kg y reps. Solo cuenta lo marcado.'}
           </p>
         )}
 

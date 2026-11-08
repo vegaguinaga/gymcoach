@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { cambiarFecha, normalizarSerie } from '../../domain/edicionSesion'
 import { normalizarNota } from '../../domain/notas'
-import { nuevaSesion } from '../../domain/sesion'
+import { nuevaSesion, sesionOlvidada } from '../../domain/sesion'
 import type { Routine, SetLog, WorkoutSession } from '../../domain/tipos'
 import { db } from '../db'
 
@@ -91,5 +91,15 @@ export async function cambiarFechaSesion(id: number, dia: string): Promise<boole
     if (!nueva) return false
     await db.sesiones.update(id, nueva)
     return true
+  })
+}
+
+/** Guarda una sesión que no se anotó a tiempo (terminada, con las series sin marcar). Devuelve su id o null si no es válida. */
+export async function registrarSesionOlvidada(rutina: Routine, diaIndice: number, inicio: Date, duracionMin: number): Promise<number | null> {
+  return db.transaction('rw', db.sesiones, db.ejercicios, async () => {
+    const historial = await db.sesiones.where('estado').equals('terminada').toArray()
+    const ejercicios = await db.ejercicios.toArray()
+    const sesion = sesionOlvidada(rutina, diaIndice, historial, { inicio, duracionMin, ejercicios })
+    return sesion ? ((await db.sesiones.add(sesion)) as number) : null
   })
 }

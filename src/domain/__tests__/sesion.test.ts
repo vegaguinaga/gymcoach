@@ -8,6 +8,7 @@ import {
   quitarSerie,
   resumenSesion,
   segundosRestantes,
+  sesionOlvidada,
   seriesIniciales,
   siguienteDia,
   ultimasSeries,
@@ -193,5 +194,36 @@ describe('cambiarEjercicioEnSesion', () => {
     const s = enCurso(base)
     expect(cambiarEjercicioEnSesion(s, 0, ej('curl'), [])).toBe(s)
     expect(cambiarEjercicioEnSesion(s, 9, prensa, [])).toBe(s)
+  })
+})
+
+describe('sesionOlvidada', () => {
+  const ahora = new Date('2026-01-10T12:00:00Z')
+  const inicio = new Date('2026-01-05T18:00:00Z')
+  const antes = sesion({ fecha: '2026-01-03T18:00:00Z', series: [serie('sentadilla', 1, 60, 6), serie('sentadilla', 2, 60, 6), serie('sentadilla', 3, 60, 6)] })
+  const despues = sesion({ fecha: '2026-01-08T18:00:00Z', series: [serie('sentadilla', 1, 100, 6)] })
+
+  it('queda terminada en la fecha indicada, con fin según la duración y sin sugerencias', () => {
+    const s = sesionOlvidada(rutina, 0, [], { inicio, duracionMin: 45, ahora })!
+    expect(s).toMatchObject({ estado: 'terminada', fecha: inicio.toISOString(), fin: '2026-01-05T18:45:00.000Z', diaNombre: 'A', diaIndice: 0, rutinaId: 7 })
+    expect(s.sugerencias).toBeUndefined()
+    expect('sugerencias' in s).toBe(false)
+  })
+  it('las series van sin marcar y usan solo el historial anterior a esa fecha', () => {
+    const s = sesionOlvidada(rutina, 0, [antes, despues], { inicio, duracionMin: 60, ahora })!
+    expect(s.series.every((x) => !x.completada)).toBe(true)
+    const kgSentadilla = s.series.filter((x) => x.ejercicioId === 'sentadilla').map((x) => x.kg)
+    expect(kgSentadilla.length).toBe(3)
+    expect(kgSentadilla.every((kg) => kg === 60)).toBe(true)
+  })
+  it('limita la duración y no termina después de ahora', () => {
+    expect(sesionOlvidada(rutina, 0, [], { inicio, duracionMin: 999, ahora })!.fin).toBe('2026-01-05T22:00:00.000Z')
+    const hoy = new Date('2026-01-10T11:30:00Z')
+    expect(sesionOlvidada(rutina, 0, [], { inicio: hoy, duracionMin: 60, ahora })!.fin).toBe(ahora.toISOString())
+  })
+  it('null con fecha futura, día inexistente o sin ejercicios', () => {
+    expect(sesionOlvidada(rutina, 0, [], { inicio: new Date('2026-01-11T10:00:00Z'), duracionMin: 60, ahora })).toBeNull()
+    expect(sesionOlvidada(rutina, 5, [], { inicio, duracionMin: 60, ahora })).toBeNull()
+    expect(sesionOlvidada(rutina, 1, [], { inicio, duracionMin: 60, ahora })).toBeNull()
   })
 })

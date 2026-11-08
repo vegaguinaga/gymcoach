@@ -10,6 +10,7 @@ import { DetalleSesion } from './DetalleSesion'
 import { GraficaEjercicio } from './GraficaEjercicio'
 import { GraficaPeso } from './GraficaPeso'
 import { Historial } from './Historial'
+import { SesionOlvidada } from './SesionOlvidada'
 
 const SECCIONES = { historial: 'Historial', calendario: 'Calendario', ejercicios: 'Ejercicios', peso: 'Peso' } as const
 type Seccion = keyof typeof SECCIONES
@@ -73,7 +74,12 @@ export default function PantallaProgreso({ param }: { param?: string }) {
           ))}
         </div>
 
-        {seccion === 'historial' && <Historial sesiones={sesiones} />}
+        {seccion === 'historial' && (
+          <>
+            <SesionOlvidada />
+            <Historial sesiones={sesiones} />
+          </>
+        )}
         {seccion === 'calendario' && <Calendario sesiones={sesiones} />}
         {seccion === 'ejercicios' && (
           <GraficaEjercicio sesiones={sesiones} ids={ejerciciosRealizados(sesiones)} ejercicios={ejercicios} />

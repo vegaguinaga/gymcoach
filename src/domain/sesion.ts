@@ -79,6 +79,38 @@ export function nuevaSesion(
   }
 }
 
+export const DURACION_OLVIDADA = { min: 10, max: 240, porDefecto: 60 } as const
+
+export interface OpcionesOlvidada {
+  /** Inicio real de la sesión (en el pasado) */
+  inicio: Date
+  duracionMin: number
+  ejercicios?: Exercise[]
+  ahora?: Date
+}
+
+/**
+ * Sesión que no se anotó a tiempo: queda terminada en la fecha indicada.
+ * Las series traen los kg y reps que se habrían sugerido ese día (solo con el historial anterior)
+ * y van sin marcar: solo cuenta lo que el usuario confirme con ✓.
+ * null si el día no existe, no tiene ejercicios o la fecha es futura.
+ */
+export function sesionOlvidada(
+  rutina: Routine,
+  diaIndice: number,
+  historial: WorkoutSession[],
+  { inicio, duracionMin, ejercicios = [], ahora = new Date() }: OpcionesOlvidada,
+): WorkoutSession | null {
+  const dia = rutina.dias[diaIndice]
+  if (!dia || dia.ejercicios.length === 0 || Number.isNaN(inicio.getTime()) || inicio > ahora) return null
+  const { min, max } = DURACION_OLVIDADA
+  const minutos = Math.min(max, Math.max(min, Math.round(duracionMin) || min))
+  const fin = new Date(Math.min(inicio.getTime() + minutos * 60000, ahora.getTime()))
+  const previas = historial.filter((s) => s.estado === 'terminada' && Date.parse(s.fecha) < inicio.getTime())
+  const { sugerencias: _sugerencias, ...base } = nuevaSesion(rutina, diaIndice, previas, { ejercicios, ahora: inicio })
+  return { ...base, estado: 'terminada', fin: fin.toISOString() }
+}
+
 /**
  * Cambia un ejercicio solo en la sesión de hoy (ej. la máquina está ocupada); la rutina no se toca.
  * - Las series ya hechas del original se conservan (cuentan como trabajo de ese ejercicio) y su tarjeta
