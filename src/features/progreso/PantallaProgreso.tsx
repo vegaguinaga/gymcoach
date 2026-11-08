@@ -5,18 +5,29 @@ import { useSesionesTerminadas } from '../../data/repos/sesiones'
 import { ejerciciosRealizados, recordsPorEjercicio, sesionesEnDias } from '../../domain/progreso'
 import { Chip } from '../../ui/Chip'
 import { Pantalla } from '../../ui/Pantalla'
+import { Calendario } from './Calendario'
 import { DetalleSesion } from './DetalleSesion'
 import { GraficaEjercicio } from './GraficaEjercicio'
 import { GraficaPeso } from './GraficaPeso'
 import { Historial } from './Historial'
 
-const SECCIONES = { historial: 'Historial', ejercicios: 'Ejercicios', peso: 'Peso' } as const
+const SECCIONES = { historial: 'Historial', calendario: 'Calendario', ejercicios: 'Ejercicios', peso: 'Peso' } as const
 type Seccion = keyof typeof SECCIONES
+
+// Sección abierta: se recuerda al volver de una sesión (ej. desde el calendario)
+function seccionGuardada(): Seccion {
+  try {
+    const s = sessionStorage.getItem('progreso.seccion')
+    return s && s in SECCIONES ? (s as Seccion) : 'historial'
+  } catch {
+    return 'historial'
+  }
+}
 
 export default function PantallaProgreso({ param }: { param?: string }) {
   const sesiones = useSesionesTerminadas()
   const lista = useEjercicios()
-  const [seccion, setSeccion] = useState<Seccion>('historial')
+  const [seccion, setSeccion] = useState<Seccion>(seccionGuardada)
 
   if (sesiones === undefined || lista === undefined)
     return (
@@ -47,15 +58,23 @@ export default function PantallaProgreso({ param }: { param?: string }) {
           ))}
         </dl>
 
-        <div className="flex gap-2" role="group" aria-label="Secciones de progreso">
+        <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Secciones de progreso">
           {(Object.keys(SECCIONES) as Seccion[]).map((k) => (
-            <Chip key={k} activo={k === seccion} onClick={() => setSeccion(k)}>
+            <Chip key={k} activo={k === seccion} onClick={() => {
+                setSeccion(k)
+                try {
+                  sessionStorage.setItem('progreso.seccion', k)
+                } catch {
+                  // sin almacenamiento: no pasa nada
+                }
+              }}>
               {SECCIONES[k]}
             </Chip>
           ))}
         </div>
 
         {seccion === 'historial' && <Historial sesiones={sesiones} />}
+        {seccion === 'calendario' && <Calendario sesiones={sesiones} />}
         {seccion === 'ejercicios' && (
           <GraficaEjercicio sesiones={sesiones} ids={ejerciciosRealizados(sesiones)} ejercicios={ejercicios} />
         )}
