@@ -1,5 +1,5 @@
 // Generador de rutinas para principiantes. Lógica pura: recibe perfil y biblioteca, devuelve una Routine.
-import type { DiaRutina, EjercicioPlanificado, Equipo, Exercise, GrupoMuscular, Profile, Routine } from './tipos'
+import type { DiaRutina, EjercicioPlanificado, Equipo, Exercise, Profile, Routine } from './tipos'
 
 export const MINUTOS_POR_SERIE = 2.5
 export const MINUTOS_CALENTAMIENTO = 5
@@ -189,20 +189,6 @@ export function generarRutina(perfil: Profile, ejercicios: Exercise[], ahora = n
     creada: ahora.toISOString(),
     dias: dias.map((d) => ({ ...d, ejercicios: d.ejercicios.map((e) => ({ ...e })) })),
   }
-}
-
-/** Series semanales por grupo: el grupo principal cuenta 1 y cada secundario 0.5. */
-export function seriesPorGrupo(rutina: Routine, ejercicios: Exercise[]): Record<GrupoMuscular, number> {
-  const porId = new Map(ejercicios.map((e) => [e.id, e]))
-  const conteo = {} as Record<GrupoMuscular, number>
-  for (const dia of rutina.dias)
-    for (const p of dia.ejercicios) {
-      const ej = porId.get(p.ejercicioId)
-      if (!ej) continue
-      conteo[ej.grupoPrincipal] = (conteo[ej.grupoPrincipal] ?? 0) + p.series
-      for (const g of ej.gruposSecundarios) conteo[g] = (conteo[g] ?? 0) + p.series / 2
-    }
-  return conteo
 }
 
 // --- Cambiar un ejercicio de la rutina (fase 5) ---

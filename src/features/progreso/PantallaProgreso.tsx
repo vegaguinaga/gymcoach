@@ -1,10 +1,13 @@
 // Pantalla Progreso. Se carga con lazy() desde App: así Recharts solo se descarga al abrirla.
 import { useState } from 'react'
 import { useEjercicios } from '../../data/repos/ejercicios'
+import { useRutinaActual } from '../../data/repos/rutinas'
 import { useSesionesTerminadas } from '../../data/repos/sesiones'
 import { ejerciciosRealizados, recordsPorEjercicio, sesionesEnDias } from '../../domain/progreso'
 import { Chip } from '../../ui/Chip'
 import { Pantalla } from '../../ui/Pantalla'
+import { VolumenSemanal } from '../../ui/VolumenSemanal'
+import { seriesHechasSemana, seriesPorGrupo } from '../../domain/volumen'
 import { Calendario } from './Calendario'
 import { DetalleSesion } from './DetalleSesion'
 import { GraficaEjercicio } from './GraficaEjercicio'
@@ -12,7 +15,7 @@ import { GraficaPeso } from './GraficaPeso'
 import { Historial } from './Historial'
 import { SesionOlvidada } from './SesionOlvidada'
 
-const SECCIONES = { historial: 'Historial', calendario: 'Calendario', ejercicios: 'Ejercicios', peso: 'Peso' } as const
+const SECCIONES = { historial: 'Historial', calendario: 'Calendario', ejercicios: 'Ejercicios', volumen: 'Volumen', peso: 'Peso' } as const
 type Seccion = keyof typeof SECCIONES
 
 // Sección abierta: se recuerda al volver de una sesión (ej. desde el calendario)
@@ -28,6 +31,7 @@ function seccionGuardada(): Seccion {
 export default function PantallaProgreso({ param }: { param?: string }) {
   const sesiones = useSesionesTerminadas()
   const lista = useEjercicios()
+  const rutina = useRutinaActual()
   const [seccion, setSeccion] = useState<Seccion>(seccionGuardada)
 
   if (sesiones === undefined || lista === undefined)
@@ -84,6 +88,15 @@ export default function PantallaProgreso({ param }: { param?: string }) {
         {seccion === 'ejercicios' && (
           <GraficaEjercicio sesiones={sesiones} ids={ejerciciosRealizados(sesiones)} ejercicios={ejercicios} />
         )}
+        {seccion === 'volumen' &&
+          (rutina ? (
+            <section className="rounded-xl bg-neutral-900 p-4" aria-label="Volumen de esta semana">
+              <h2 className="mb-3 font-semibold">Esta semana</h2>
+              <VolumenSemanal plan={seriesPorGrupo(rutina, lista)} hechas={seriesHechasSemana(sesiones, lista)} />
+            </section>
+          ) : (
+            <p className="text-neutral-400">Genera tu rutina para comparar lo que haces con lo planificado.</p>
+          ))}
         {seccion === 'peso' && <GraficaPeso />}
       </div>
     </Pantalla>

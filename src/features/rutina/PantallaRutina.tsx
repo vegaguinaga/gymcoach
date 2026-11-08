@@ -7,6 +7,8 @@ import { MAX_DIAS, agregarDia, quitarDia, renombrarRutina } from '../../domain/e
 import type { DiaRutina, EjercicioPlanificado, Equipo, Exercise, Routine } from '../../domain/tipos'
 import { AvisoSeguridad } from '../../ui/AvisoSeguridad'
 import { OpcionesCambio } from '../../ui/OpcionesCambio'
+import { VolumenSemanal } from '../../ui/VolumenSemanal'
+import { seriesPorGrupo } from '../../domain/volumen'
 import { Pantalla } from '../../ui/Pantalla'
 import { EditorDia } from './EditorDia'
 
@@ -114,6 +116,12 @@ export function PantallaRutina() {
         {rutina && (
           <>
             <AvisoSeguridad compuesto />
+            <details className="rounded-xl bg-neutral-900 p-4">
+              <summary className="flex min-h-11 cursor-pointer items-center font-semibold">📊 Volumen semanal</summary>
+              <div className="mt-2">
+                <VolumenSemanal plan={seriesPorGrupo(rutina, ejercicios)} />
+              </div>
+            </details>
             {rutina.dias.map((dia, i) => (
               <TarjetaDia
                 key={`${i}-${dia.nombre}`}
