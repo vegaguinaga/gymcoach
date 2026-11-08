@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useEjercicios } from '../../data/repos/ejercicios'
 import { useRutinaActual } from '../../data/repos/rutinas'
-import { empezarSesion, useSesionEnCurso, useUltimaSesion } from '../../data/repos/sesiones'
+import { empezarSesion, useSesionEnCurso, useSesionesTerminadas, useUltimaSesion } from '../../data/repos/sesiones'
 import { minutosEstimados } from '../../domain/generador'
+import { estadoDescarga, type EstadoDescarga } from '../../domain/progresion'
 import { siguienteDia } from '../../domain/sesion'
-import type { Routine, WorkoutSession } from '../../domain/tipos'
+import type { Exercise, Routine, WorkoutSession } from '../../domain/tipos'
 import { Pantalla } from '../../ui/Pantalla'
 import { ResumenSesion } from './ResumenSesion'
 import { SesionEnCurso } from './SesionEnCurso'
@@ -14,10 +15,11 @@ export function PantallaEntrenar() {
   const enCurso = useSesionEnCurso()
   const ultima = useUltimaSesion()
   const ejercicios = useEjercicios()
+  const historial = useSesionesTerminadas()
   // Sesión recién terminada: se muestra su resumen hasta tocar "Listo"
   const [terminada, setTerminada] = useState<WorkoutSession | null>(null)
 
-  if (rutina === undefined || enCurso === undefined || ultima === undefined || ejercicios === undefined)
+  if (rutina === undefined || enCurso === undefined || ultima === undefined || ejercicios === undefined || historial === undefined)
     return (
       <Pantalla titulo="Entrenar">
         <p className="text-neutral-400">Cargando…</p>
@@ -41,17 +43,37 @@ export function PantallaEntrenar() {
       </Pantalla>
     )
 
-  return <SelectorDia rutina={rutina} sugerido={siguienteDia(rutina, ultima)} />
+  // Compuestos de la rutina actual: si su 1RM baja 2 sesiones seguidas se recomienda descargar
+  const compuestos = [...new Set(rutina.dias.flatMap((d) => d.ejercicios.map((e) => e.ejercicioId)))].filter(
+    (id) => nombres.get(id)?.tipo === 'compuesto',
+  )
+  return (
+    <SelectorDia
+      rutina={rutina}
+      sugerido={siguienteDia(rutina, ultima)}
+      descarga={estadoDescarga(historial, compuestos)}
+      ejercicios={nombres}
+    />
+  )
 }
 
-function SelectorDia({ rutina, sugerido }: { rutina: Routine; sugerido: number }) {
+interface PropsSelector {
+  rutina: Routine
+  sugerido: number
+  descarga: EstadoDescarga
+  ejercicios: Map<string, Exercise>
+}
+
+function SelectorDia({ rutina, sugerido, descarga, ejercicios }: PropsSelector) {
   const [elegido, setElegido] = useState(sugerido)
   const [empezando, setEmpezando] = useState(false)
+  const hayAviso = descarga.activa || descarga.recomendada
+  const [conDescarga, setConDescarga] = useState(hayAviso)
 
   async function empezar() {
     setEmpezando(true)
     try {
-      await empezarSesion(rutina, elegido)
+      await empezarSesion(rutina, elegido, hayAviso && conDescarga)
     } finally {
       setEmpezando(false)
     }
@@ -89,6 +111,27 @@ function SelectorDia({ rutina, sugerido }: { rutina: Routine; sugerido: number }
           </label>
         ))}
       </fieldset>
+      {hayAviso && (
+        <div className="mt-4 rounded-xl border border-sky-400/40 bg-sky-400/10 p-4">
+          <p className="font-semibold text-sky-200">
+            {descarga.activa ? '🧘 Semana de descarga en curso' : '🧘 Te toca una semana de descarga'}
+          </p>
+          <p className="mt-1 text-sm text-neutral-300">
+            {descarga.motivo}
+            {descarga.ejercicioId && ` (${ejercicios.get(descarga.ejercicioId)?.nombre ?? descarga.ejercicioId})`}.
+            {descarga.recomendada && ' Durante 7 días haces la mitad de las series con el mismo peso.'}
+          </p>
+          <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={conDescarga}
+              onChange={(e) => setConDescarga(e.target.checked)}
+              className="size-5 accent-sky-400"
+            />
+            <span>Entrenar hoy en modo descarga</span>
+          </label>
+        </div>
+      )}
       <button
         type="button"
         onClick={empezar}

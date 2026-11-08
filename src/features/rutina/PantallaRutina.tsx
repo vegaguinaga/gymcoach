@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useEjercicios } from '../../data/repos/ejercicios'
 import { usePerfil } from '../../data/repos/perfil'
-import { guardarRutina, useRutinaActual } from '../../data/repos/rutinas'
-import { diasEfectivos, generarRutina, minutosEstimados } from '../../domain/generador'
-import type { DiaRutina, EjercicioPlanificado, Exercise } from '../../domain/tipos'
+import { actualizarRutina, guardarRutina, useRutinaActual } from '../../data/repos/rutinas'
+import { cambiarEjercicio, diasEfectivos, generarRutina, minutosEstimados, opcionesDeCambio } from '../../domain/generador'
+import { ETIQUETA_EQUIPO } from '../../domain/biblioteca'
+import type { DiaRutina, EjercicioPlanificado, Equipo, Exercise } from '../../domain/tipos'
 import { AvisoSeguridad } from '../../ui/AvisoSeguridad'
 import { Pantalla } from '../../ui/Pantalla'
 
@@ -95,7 +96,15 @@ export function PantallaRutina() {
           <>
             <AvisoSeguridad compuesto />
             {rutina.dias.map((dia, i) => (
-              <TarjetaDia key={i} numero={i + 1} dia={dia} porId={porId} />
+              <TarjetaDia
+                key={i}
+                numero={i + 1}
+                dia={dia}
+                porId={porId}
+                ejercicios={ejercicios}
+                equipo={perfil.equipo}
+                alCambiar={(pos, nuevo) => actualizarRutina(cambiarEjercicio(rutina, i, pos, nuevo))}
+              />
             ))}
           </>
         )}
@@ -104,7 +113,18 @@ export function PantallaRutina() {
   )
 }
 
-function TarjetaDia({ numero, dia, porId }: { numero: number; dia: DiaRutina; porId: Map<string, Exercise> }) {
+interface PropsDia {
+  numero: number
+  dia: DiaRutina
+  porId: Map<string, Exercise>
+  ejercicios: Exercise[]
+  equipo: Equipo[]
+  alCambiar: (posicion: number, nuevo: Exercise) => Promise<void>
+}
+
+function TarjetaDia({ numero, dia, porId, ejercicios, equipo, alCambiar }: PropsDia) {
+  // Posición del ejercicio cuyo selector de cambio está abierto
+  const [cambiando, setCambiando] = useState<number | null>(null)
   return (
     <section className="rounded-xl bg-neutral-900 p-4" aria-labelledby={`dia-${numero}`}>
       <header className="mb-2 flex items-baseline justify-between gap-2">
@@ -114,9 +134,29 @@ function TarjetaDia({ numero, dia, porId }: { numero: number; dia: DiaRutina; po
         <span className="shrink-0 text-sm text-neutral-400">~{minutosEstimados(dia)} min</span>
       </header>
       <ul className="divide-y divide-neutral-800">
-        {dia.ejercicios.map((e) => (
-          <FilaEjercicio key={e.ejercicioId} plan={e} ejercicio={porId.get(e.ejercicioId)} />
-        ))}
+        {dia.ejercicios.map((e, pos) => {
+          const ejercicio = porId.get(e.ejercicioId)
+          const abierto = cambiando === pos
+          return (
+            <FilaEjercicio
+              key={e.ejercicioId}
+              plan={e}
+              ejercicio={ejercicio}
+              abierto={abierto}
+              alAlternar={() => setCambiando(abierto ? null : pos)}
+            >
+              {abierto && ejercicio && (
+                <OpcionesCambio
+                  opciones={opcionesDeCambio(ejercicio, dia, ejercicios, equipo)}
+                  alElegir={async (nuevo) => {
+                    await alCambiar(pos, nuevo)
+                    setCambiando(null)
+                  }}
+                />
+              )}
+            </FilaEjercicio>
+          )
+        })}
       </ul>
       {!!dia.cardioMin && (
         <p className="mt-2 text-sm text-neutral-300">
@@ -127,21 +167,63 @@ function TarjetaDia({ numero, dia, porId }: { numero: number; dia: DiaRutina; po
   )
 }
 
-function FilaEjercicio({ plan, ejercicio }: { plan: EjercicioPlanificado; ejercicio?: Exercise }) {
+interface PropsFila {
+  plan: EjercicioPlanificado
+  ejercicio?: Exercise
+  abierto: boolean
+  alAlternar: () => void
+  children?: ReactNode
+}
+
+function FilaEjercicio({ plan, ejercicio, abierto, alAlternar, children }: PropsFila) {
   return (
-    <li>
-      <a
-        href={`#/ejercicios/${plan.ejercicioId}`}
-        className="flex min-h-14 items-center justify-between gap-3 py-2 active:bg-neutral-800"
-      >
-        <span className="flex flex-col">
+    <li className="py-1">
+      <div className="flex items-center gap-2">
+        <a
+          href={`#/ejercicios/${plan.ejercicioId}`}
+          className="flex min-h-14 flex-1 flex-col justify-center py-1 active:bg-neutral-800"
+        >
           <span className="font-semibold">{ejercicio?.nombre ?? plan.ejercicioId}</span>
           <span className="text-sm text-neutral-400">
             {plan.series} × {plan.repsMin}–{plan.repsMax} reps · RPE {plan.rpe} · descanso {textoDescanso(plan.descansoSeg)}
           </span>
-        </span>
-        <span aria-hidden="true" className="text-neutral-500">›</span>
-      </a>
+        </a>
+        <button
+          type="button"
+          onClick={alAlternar}
+          aria-expanded={abierto}
+          className={`min-h-11 shrink-0 rounded-lg px-3 text-sm font-semibold ${
+            abierto ? 'bg-neutral-700 text-neutral-100' : 'bg-neutral-800 text-neutral-300'
+          }`}
+        >
+          {abierto ? 'Cerrar' : 'Cambiar'}
+        </button>
+      </div>
+      {children}
     </li>
+  )
+}
+
+function OpcionesCambio({ opciones, alElegir }: { opciones: Exercise[]; alElegir: (e: Exercise) => void }) {
+  if (opciones.length === 0)
+    return <p className="mb-2 rounded-lg bg-neutral-800 p-3 text-sm text-neutral-300">No hay alternativas con tu equipo.</p>
+  return (
+    <div className="mb-2 rounded-lg bg-neutral-800 p-2">
+      <p className="px-2 pb-1 text-xs text-neutral-400">Cambiar por (en todos los días iguales):</p>
+      <ul>
+        {opciones.map((o) => (
+          <li key={o.id}>
+            <button
+              type="button"
+              onClick={() => alElegir(o)}
+              className="flex min-h-11 w-full items-center justify-between gap-2 rounded-lg px-2 text-left active:bg-neutral-700"
+            >
+              <span>{o.nombre}</span>
+              <span className="shrink-0 text-xs text-neutral-400">{ETIQUETA_EQUIPO[o.equipo]}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

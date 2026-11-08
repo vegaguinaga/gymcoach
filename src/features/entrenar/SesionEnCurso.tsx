@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { descartarSesion, modificarSesion, terminarSesion } from '../../data/repos/sesiones'
 import { redondearKg } from '../../domain/unidades'
 import { agregarSerie, finDescanso, quitarSerie } from '../../domain/sesion'
-import type { EjercicioPlanificado, Exercise, SetLog, WorkoutSession } from '../../domain/tipos'
+import type { EjercicioPlanificado, Exercise, SetLog, Sugerencia, TipoSugerencia, WorkoutSession } from '../../domain/tipos'
 import { AvisoSeguridad } from '../../ui/AvisoSeguridad'
 import { Pantalla } from '../../ui/Pantalla'
 import { prepararAviso } from './aviso'
@@ -35,6 +35,11 @@ export function SesionEnCurso({ sesion, ejercicios, alTerminar }: Props) {
     <Pantalla titulo={sesion.diaNombre}>
       <div className="flex flex-col gap-4">
         <Cronometro desde={sesion.fecha} />
+        {sesion.descarga && (
+          <p className="rounded-xl bg-sky-400/10 p-3 text-sm text-sky-200">
+            🧘 Semana de descarga: la mitad de las series y el mismo peso. Termina cada serie con reps de sobra.
+          </p>
+        )}
         <AvisoSeguridad compuesto />
         {sesion.ejercicios.map((plan) => (
           <TarjetaEjercicio
@@ -43,6 +48,7 @@ export function SesionEnCurso({ sesion, ejercicios, alTerminar }: Props) {
             plan={plan}
             ejercicio={ejercicios.get(plan.ejercicioId)}
             series={sesion.series}
+            sugerencia={sesion.sugerencias?.[plan.ejercicioId]}
           />
         ))}
         <button type="button" onClick={terminar} className="min-h-14 rounded-xl bg-lime-400 text-lg font-bold text-neutral-950">
@@ -59,16 +65,26 @@ export function SesionEnCurso({ sesion, ejercicios, alTerminar }: Props) {
   )
 }
 
+const COLOR_SUGERENCIA: Record<TipoSugerencia, string> = {
+  subir: 'text-lime-300',
+  mantener: 'text-neutral-200',
+  bajar: 'text-amber-300',
+  nuevo: 'text-sky-300',
+  descarga: 'text-sky-300',
+}
+
 function TarjetaEjercicio({
   id,
   plan,
   ejercicio,
   series,
+  sugerencia,
 }: {
   id: number
   plan: EjercicioPlanificado
   ejercicio?: Exercise
   series: SetLog[]
+  sugerencia?: Sugerencia
 }) {
   const propias = series.map((s, indice) => ({ s, indice })).filter(({ s }) => s.ejercicioId === plan.ejercicioId)
   const hechas = propias.filter(({ s }) => s.completada).length
@@ -99,6 +115,7 @@ function TarjetaEjercicio({
           <p className="text-sm text-neutral-400">
             Objetivo: {plan.series} × {plan.repsMin}–{plan.repsMax} reps · RPE {plan.rpe}
           </p>
+          {sugerencia && <p className={`mt-1 text-sm font-medium ${COLOR_SUGERENCIA[sugerencia.tipo]}`}>{sugerencia.texto}</p>}
         </div>
         <span className={`shrink-0 text-sm ${hechas === propias.length ? 'text-lime-300' : 'text-neutral-400'}`}>
           {hechas}/{propias.length}
