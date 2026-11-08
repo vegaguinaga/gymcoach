@@ -56,7 +56,7 @@ export interface BodyWeightEntry {
   kg: number
 }
 
-// --- Tipos que se usarán en fases siguientes (rutinas y sesiones) ---
+// --- Rutinas (fase 2) y sesiones (fase 3) ---
 
 export interface EjercicioPlanificado {
   ejercicioId: string
@@ -70,6 +70,8 @@ export interface EjercicioPlanificado {
 export interface DiaRutina {
   nombre: string
   ejercicios: EjercicioPlanificado[]
+  /** Minutos de cardio sugeridos al final (pérdida de grasa) */
+  cardioMin?: number
 }
 
 export interface Routine {
