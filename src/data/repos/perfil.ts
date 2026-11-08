@@ -29,3 +29,8 @@ export async function registrarPeso(kg: number, ahora = new Date()): Promise<boo
   })
   return true
 }
+
+/** Todos los pesos corporales, del más antiguo al más reciente (para la gráfica). */
+export function usePesosCorporales(): BodyWeightEntry[] | undefined {
+  return useLiveQuery(() => db.pesosCorporales.orderBy('fecha').toArray())
+}

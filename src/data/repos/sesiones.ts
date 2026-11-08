@@ -48,3 +48,18 @@ export async function terminarSesion(id: number, fin = new Date().toISOString())
 export async function descartarSesion(id: number): Promise<void> {
   await db.sesiones.delete(id)
 }
+
+/** Sesiones terminadas, de la más reciente a la más antigua. */
+export function useSesionesTerminadas(): WorkoutSession[] | undefined {
+  return useLiveQuery(async () => (await db.sesiones.where('estado').equals('terminada').sortBy('fecha')).reverse())
+}
+
+/** Una sesión por id (null si no existe). */
+export function useSesion(id: number): WorkoutSession | null | undefined {
+  return useLiveQuery(async () => (await db.sesiones.get(id)) ?? null, [id])
+}
+
+/** Borra una sesión terminada del historial (el usuario lo confirma antes). */
+export async function borrarSesion(id: number): Promise<void> {
+  await db.sesiones.delete(id)
+}
