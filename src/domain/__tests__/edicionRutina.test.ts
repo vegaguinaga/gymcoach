@@ -74,10 +74,13 @@ describe('agregarEjercicio', () => {
     expect(ids(r, 1)).toEqual(['D', 'E'])
     expect(r.dias[0].ejercicios[3]).toMatchObject({ repsMin: 10, repsMax: 15 })
   })
-  it('no repite un ejercicio del día ni agrega la plancha', () => {
+  it('no repite un ejercicio del día', () => {
     const r = agregarEjercicio(rutina, 0, ej('curl_mancuernas'))
     expect(agregarEjercicio(r, 0, ej('curl_mancuernas'))).toBe(r)
-    expect(agregarEjercicio(rutina, 0, ej('plancha'))).toBe(rutina)
+  })
+  it('la plancha se agrega en segundos (20–45 s)', () => {
+    const p = agregarEjercicio(rutina, 0, ej('plancha')).dias[0].ejercicios.at(-1)
+    expect([p?.ejercicioId, p?.repsMin, p?.repsMax, p?.descansoSeg]).toEqual(['plancha', 20, 45, 60])
   })
 })
 

@@ -3,12 +3,14 @@
 // (ej. «Full Body A» se repite en los días 1 y 3), igual que «Cambiar» ejercicio.
 // Los días se pueden agregar (copia de otro, al final) y quitar; «qué día toca» sigue
 // funcionando porque avanza en ciclo, y el historial no cambia (cada sesión guarda su copia del día).
-import { NO_PRESCRIBIBLES, prescripcion } from './generador'
+import { prescripcion } from './generador'
+import { LIMITES_REPS, limitesReps } from './medida'
 import type { DiaRutina, EjercicioPlanificado, Exercise, Routine } from './tipos'
 
 export const LIMITES = {
   series: { min: 1, max: 6 },
-  reps: { min: 1, max: 30 },
+  /** En ejercicios por tiempo se usan LIMITES_SEGUNDOS (ver limitesReps) */
+  reps: LIMITES_REPS,
   rpe: { min: 5, max: 10 },
   descansoSeg: { min: 30, max: 300, paso: 15 },
 } as const
@@ -24,17 +26,24 @@ function enDiasIguales(rutina: Routine, diaIndice: number, cambio: (d: DiaRutina
   return { ...rutina, personalizada: true, dias: rutina.dias.map((d) => (d.nombre === dia.nombre ? cambio(d) : d)) }
 }
 
-/** Deja una prescripción dentro de los límites (si el mínimo de reps supera al máximo, sube el máximo). */
+/** Redondea al paso y deja dentro de [min, max]. */
+const limitarPaso = (n: number, l: { min: number; max: number; paso: number }) => limitar(Math.round(n / l.paso) * l.paso, l.min, l.max)
+
+/**
+ * Deja una prescripción dentro de los límites (si el mínimo de reps supera al máximo, sube el máximo).
+ * En ejercicios por tiempo, reps son segundos (10–180, de 5 en 5).
+ */
 export function normalizarPrescripcion(p: EjercicioPlanificado): EjercicioPlanificado {
-  const { series, reps, rpe, descansoSeg: d } = LIMITES
-  const repsMin = limitar(p.repsMin, reps.min, reps.max)
+  const { series, rpe, descansoSeg: d } = LIMITES
+  const reps = limitesReps(p.ejercicioId)
+  const repsMin = limitarPaso(p.repsMin, reps)
   return {
     ...p,
     series: limitar(p.series, series.min, series.max),
     repsMin,
-    repsMax: limitar(Math.max(p.repsMax, repsMin), reps.min, reps.max),
+    repsMax: limitarPaso(Math.max(p.repsMax, repsMin), reps),
     rpe: limitar(p.rpe, rpe.min, rpe.max),
-    descansoSeg: limitar(Math.round(p.descansoSeg / d.paso) * d.paso, d.min, d.max),
+    descansoSeg: limitarPaso(p.descansoSeg, d),
   }
 }
 
@@ -56,9 +65,9 @@ export function editarPrescripcion(
   }))
 }
 
-/** true si el ejercicio se puede agregar al día (no está ya y se mide en reps). */
+/** true si el ejercicio se puede agregar al día (no está ya). */
 export function sePuedeAgregar(dia: DiaRutina, ejercicio: Exercise): boolean {
-  return !NO_PRESCRIBIBLES.has(ejercicio.id) && !dia.ejercicios.some((e) => e.ejercicioId === ejercicio.id)
+  return !dia.ejercicios.some((e) => e.ejercicioId === ejercicio.id)
 }
 
 /** Agrega un ejercicio al final del día con la prescripción de su tipo. */

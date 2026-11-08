@@ -1,3 +1,4 @@
+import { esPorTiempo } from '../../domain/medida'
 import { useState } from 'react'
 import { borrarSesion, cambiarFechaSesion, editarSesionTerminada, useSesion, useSesionesTerminadas } from '../../data/repos/sesiones'
 import { claveDia } from '../../domain/calendario'
@@ -113,7 +114,7 @@ export function DetalleSesion({ id, ejercicios }: { id: number; ejercicios: Map<
                 repsPorDefecto={repsDe(ejId)}
               />
             ) : (
-              <TablaSeries series={series.filter((s) => s.ejercicioId === ejId)} />
+              <TablaSeries series={series.filter((s) => s.ejercicioId === ejId)} porTiempo={esPorTiempo(ejId)} />
             )}
           </section>
         ))}
@@ -156,14 +157,14 @@ export function DetalleSesion({ id, ejercicios }: { id: number; ejercicios: Map<
   )
 }
 
-function TablaSeries({ series }: { series: SetLog[] }) {
+function TablaSeries({ series, porTiempo }: { series: SetLog[]; porTiempo: boolean }) {
   return (
     <table className="w-full text-sm tabular-nums">
       <thead className="text-left text-xs text-neutral-500">
         <tr>
           <th className="font-normal">Serie</th>
           <th className="font-normal">Kg</th>
-          <th className="font-normal">Reps</th>
+          <th className="font-normal">{porTiempo ? 'Seg' : 'Reps'}</th>
           <th className="font-normal">RPE</th>
         </tr>
       </thead>
@@ -198,7 +199,7 @@ function EditorSeries({ series, ejercicioId, repsPorDefecto, alCambiar }: PropsE
       <div className={`${COLUMNAS} text-xs text-neutral-500`}>
         <span>#</span>
         <span>Kg</span>
-        <span>Reps</span>
+        <span>{esPorTiempo(ejercicioId) ? 'Seg' : 'Reps'}</span>
         <span>RPE</span>
         <span className="sr-only">Hecha</span>
         <span className="sr-only">Quitar</span>
@@ -214,7 +215,7 @@ function EditorSeries({ series, ejercicioId, repsPorDefecto, alCambiar }: PropsE
               alCambiar={(kg) => alCambiar(editarSerie(series, indice, { kg }))}
             />
             <CampoNumero
-              etiqueta={`Reps, serie ${s.serie}`}
+              etiqueta={`${esPorTiempo(ejercicioId) ? 'Segundos' : 'Reps'}, serie ${s.serie}`}
               valor={s.reps}
               alCambiar={(reps) => alCambiar(editarSerie(series, indice, { reps }))}
             />

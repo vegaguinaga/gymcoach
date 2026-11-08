@@ -1,3 +1,4 @@
+import { esPorTiempo, limitesReps } from '../../domain/medida'
 import { useState } from 'react'
 import { filtrarEjercicios } from '../../domain/biblioteca'
 import {
@@ -99,7 +100,10 @@ interface PropsFila {
 }
 
 function FilaEditable({ plan, nombre, primero, ultimo, unico, alEditar, alMover, alQuitar }: PropsFila) {
-  const { series, reps, rpe, descansoSeg: d } = LIMITES
+  const { series, rpe, descansoSeg: d } = LIMITES
+  // En ejercicios por tiempo, reps son segundos (de 5 en 5)
+  const reps = limitesReps(plan.ejercicioId)
+  const etiquetaReps = esPorTiempo(plan.ejercicioId) ? 'Segundos' : 'Reps'
   return (
     <li className="rounded-lg border border-neutral-800 p-3">
       <div className="mb-2 flex items-center gap-1">
@@ -135,16 +139,16 @@ function FilaEditable({ plan, nombre, primero, ultimo, unico, alEditar, alMover,
           mas={plan.rpe < rpe.max ? () => alEditar({ rpe: plan.rpe + 1 }) : undefined}
         />
         <Contador
-          etiqueta="Reps mín."
+          etiqueta={`${etiquetaReps} mín.`}
           texto={String(plan.repsMin)}
-          menos={plan.repsMin > reps.min ? () => alEditar({ repsMin: plan.repsMin - 1 }) : undefined}
-          mas={plan.repsMin < reps.max ? () => alEditar({ repsMin: plan.repsMin + 1 }) : undefined}
+          menos={plan.repsMin > reps.min ? () => alEditar({ repsMin: plan.repsMin - reps.paso }) : undefined}
+          mas={plan.repsMin < reps.max ? () => alEditar({ repsMin: plan.repsMin + reps.paso }) : undefined}
         />
         <Contador
-          etiqueta="Reps máx."
+          etiqueta={`${etiquetaReps} máx.`}
           texto={String(plan.repsMax)}
-          menos={plan.repsMax > reps.min ? () => alEditar({ repsMax: plan.repsMax - 1 }) : undefined}
-          mas={plan.repsMax < reps.max ? () => alEditar({ repsMax: plan.repsMax + 1 }) : undefined}
+          menos={plan.repsMax > reps.min ? () => alEditar({ repsMax: plan.repsMax - reps.paso }) : undefined}
+          mas={plan.repsMax < reps.max ? () => alEditar({ repsMax: plan.repsMax + reps.paso }) : undefined}
         />
         <Contador
           etiqueta="Descanso"

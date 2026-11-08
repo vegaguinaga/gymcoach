@@ -8,6 +8,7 @@ import type { DiaRutina, EjercicioPlanificado, Equipo, Exercise, Routine } from 
 import { AvisoSeguridad } from '../../ui/AvisoSeguridad'
 import { OpcionesCambio } from '../../ui/OpcionesCambio'
 import { VolumenSemanal } from '../../ui/VolumenSemanal'
+import { unidad } from '../../domain/medida'
 import { seriesPorGrupo } from '../../domain/volumen'
 import { Pantalla } from '../../ui/Pantalla'
 import { EditorDia } from './EditorDia'
@@ -292,7 +293,7 @@ function FilaEjercicio({ plan, ejercicio, abierto, alAlternar, children }: Props
         >
           <span className="font-semibold">{ejercicio?.nombre ?? plan.ejercicioId}</span>
           <span className="text-sm text-neutral-400">
-            {plan.series} × {plan.repsMin}–{plan.repsMax} reps · RPE {plan.rpe} · descanso {textoDescanso(plan.descansoSeg)}
+            {plan.series} × {plan.repsMin}–{plan.repsMax} {unidad(plan.ejercicioId)} · RPE {plan.rpe} · descanso {textoDescanso(plan.descansoSeg)}
           </span>
         </a>
         <button

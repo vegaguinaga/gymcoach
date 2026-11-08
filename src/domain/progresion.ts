@@ -1,5 +1,6 @@
 // Progresión: doble progresión (reps y luego peso), bajadas y semanas de descarga.
 // Lógica pura: sin React ni Dexie. Solo cuentan las sesiones terminadas y las series completadas.
+import { PASO_SEGUNDOS, esPorTiempo } from './medida'
 import { historialEjercicio } from './progreso'
 import type { EjercicioPlanificado, Exercise, SetLog, Sugerencia, WorkoutSession } from './tipos'
 import { redondearKg } from './unidades'
@@ -43,15 +44,20 @@ export function sugerencia(
   descarga = false,
 ): Sugerencia {
   const n = descarga ? Math.ceil(plan.series / 2) : plan.series
+  // Por tiempo, reps son segundos: se progresa de 5 en 5 s en lugar de 1 rep
+  const porTiempo = esPorTiempo(plan.ejercicioId)
+  const paso = porTiempo ? PASO_SEGUNDOS : 1
+  const u = porTiempo ? 's' : 'reps'
   const previas = seriesPorSesion(plan.ejercicioId, historial)
   const ultima = previas[0]
   if (!ultima) {
-    return { tipo: 'nuevo', kg: 0, reps: lista(n, () => plan.repsMin), texto: 'Nuevo: empieza liviano (RPE 6) y cuida la técnica' }
+    const texto = porTiempo ? `Nuevo: aguanta ${plan.repsMin} s cuidando la postura` : 'Nuevo: empieza liviano (RPE 6) y cuida la técnica'
+    return { tipo: 'nuevo', kg: 0, reps: lista(n, () => plan.repsMin), texto }
   }
 
   const kg = Math.max(...ultima.map((s) => s.kg))
   const repsPrevia = (i: number) => ultima[Math.min(i, ultima.length - 1)].reps
-  const sinLastre = kg === 0 && ej?.equipo === 'peso_corporal'
+  const sinLastre = kg === 0 && (porTiempo || ej?.equipo === 'peso_corporal')
 
   if (descarga) {
     return { tipo: 'descarga', kg, reps: lista(n, repsPrevia), texto: `Descarga: ${n} series, mismo peso y sin llegar al fallo` }
@@ -61,10 +67,11 @@ export function sugerencia(
   const rpeOk = ultima.every((s) => s.rpe === undefined || s.rpe <= 8)
   if (alTope && rpeOk) {
     if (sinLastre) {
-      return { tipo: 'subir', kg: 0, reps: lista(n, (i) => repsPrevia(i) + 1), texto: '↑ ¡Tope del rango! Suma 1 rep o prueba una variante más difícil' }
+      const texto = porTiempo ? `↑ ¡Tope del rango! Suma ${paso} s o prueba una variante más difícil` : '↑ ¡Tope del rango! Suma 1 rep o prueba una variante más difícil'
+      return { tipo: 'subir', kg: 0, reps: lista(n, (i) => repsPrevia(i) + paso), texto }
     }
     const nuevo = redondearKg(kg + incrementoKg(ej))
-    return { tipo: 'subir', kg: nuevo, reps: lista(n, () => plan.repsMin), texto: `↑ Sube a ${nuevo} kg y vuelve a ${plan.repsMin} reps` }
+    return { tipo: 'subir', kg: nuevo, reps: lista(n, () => plan.repsMin), texto: `↑ Sube a ${nuevo} kg y vuelve a ${plan.repsMin} ${u}` }
   }
 
   // Bajo el mínimo en más de la mitad de las series, 2 sesiones seguidas
@@ -74,14 +81,14 @@ export function sugerencia(
       return { tipo: 'bajar', kg: 0, reps: lista(n, () => plan.repsMin), texto: '↓ Te está costando: prueba una variante más fácil' }
     }
     const nuevo = aMedioKg(kg * 0.9)
-    return { tipo: 'bajar', kg: nuevo, reps: lista(n, () => plan.repsMin), texto: `↓ Baja a ${nuevo} kg (−10 %) para llegar a ${plan.repsMin} reps` }
+    return { tipo: 'bajar', kg: nuevo, reps: lista(n, () => plan.repsMin), texto: `↓ Baja a ${nuevo} kg (−10 %) para llegar a ${plan.repsMin} ${u}` }
   }
 
   return {
     tipo: 'mantener',
     kg,
-    reps: lista(n, (i) => Math.min(repsPrevia(i) + 1, plan.repsMax)),
-    texto: alTope ? 'Mismo peso: llegaste al tope pero con RPE alto, repite hasta que sea más cómodo' : 'Mismo peso: intenta +1 rep por serie',
+    reps: lista(n, (i) => Math.min(repsPrevia(i) + paso, plan.repsMax)),
+    texto: alTope ? 'Mismo peso: llegaste al tope pero con RPE alto, repite hasta que sea más cómodo' : porTiempo ? `Intenta +${paso} s por serie` : 'Mismo peso: intenta +1 rep por serie',
   }
 }
 

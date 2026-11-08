@@ -1,16 +1,18 @@
 import { useState } from 'react'
 import { historialEjercicio, recordsPorEjercicio, textoSerie, type PuntoEjercicio } from '../../domain/progreso'
 import type { Exercise, WorkoutSession } from '../../domain/tipos'
+import { esPorTiempo } from '../../domain/medida'
 import { Chip } from '../../ui/Chip'
 import { GraficaLinea } from './GraficaLinea'
 import { fechaCorta } from './formato'
 
-type Metrica = 'unoRM' | 'volumen' | 'reps'
+type Metrica = 'unoRM' | 'volumen' | 'reps' | 'segundos'
 
 const METRICAS: Record<Metrica, { etiqueta: string; unidad: string; valor: (p: PuntoEjercicio) => number | null }> = {
   unoRM: { etiqueta: '1RM estimado', unidad: 'kg', valor: (p) => p.unoRM },
   volumen: { etiqueta: 'Volumen', unidad: 'kg', valor: (p) => p.volumen },
   reps: { etiqueta: 'Mejores reps', unidad: 'reps', valor: (p) => p.mejorSerie.reps },
+  segundos: { etiqueta: 'Mejor tiempo', unidad: 's', valor: (p) => p.mejorSerie.reps },
 }
 
 interface Props {
@@ -30,9 +32,11 @@ export function GraficaEjercicio({ sesiones, ids, ejercicios }: Props) {
   const id = ids.includes(elegido) ? elegido : ids[0]
   const puntos = historialEjercicio(sesiones, id)
   const record = recordsPorEjercicio(sesiones).get(id)
-  // Peso corporal sin lastre: no hay 1RM ni volumen en kg, se sigue por repeticiones
+  // Peso corporal sin lastre: no hay 1RM ni volumen en kg, se sigue por repeticiones.
+  // Por tiempo (plancha): solo segundos.
+  const porTiempo = esPorTiempo(id)
   const conKg = puntos.some((p) => p.unoRM !== null)
-  const disponibles: Metrica[] = conKg ? ['unoRM', 'volumen', 'reps'] : ['reps']
+  const disponibles: Metrica[] = porTiempo ? ['segundos'] : conKg ? ['unoRM', 'volumen', 'reps'] : ['reps']
   const metrica = disponibles.includes(metricaElegida) ? metricaElegida : disponibles[0]
   const m = METRICAS[metrica]
   const datos = puntos.flatMap((p) => {
@@ -67,7 +71,7 @@ export function GraficaEjercicio({ sesiones, ids, ejercicios }: Props) {
           </div>
           <div className="rounded-xl bg-neutral-900 p-3">
             <dt className="text-xs text-neutral-400">🏆 Mejor serie</dt>
-            <dd className="text-xl font-bold tabular-nums">{record.mejorSerie ? textoSerie(record.mejorSerie) : '—'}</dd>
+            <dd className="text-xl font-bold tabular-nums">{record.mejorSerie ? textoSerie(record.mejorSerie, porTiempo) : '—'}</dd>
             {record.mejorSerie && <dd className="text-xs text-neutral-500">{fechaCorta(record.mejorSerie.fecha)}</dd>}
           </div>
         </dl>
@@ -96,7 +100,7 @@ export function GraficaEjercicio({ sesiones, ids, ejercicios }: Props) {
               .map((p) => (
                 <li key={p.fecha} className="flex justify-between gap-2 py-2">
                   <span className="text-neutral-400">{fechaCorta(p.fecha)}</span>
-                  <span className="tabular-nums">{textoSerie(p.mejorSerie)}</span>
+                  <span className="tabular-nums">{textoSerie(p.mejorSerie, porTiempo)}</span>
                   {conKg && <span className="tabular-nums text-neutral-400">{p.unoRM ?? '—'} kg 1RM</span>}
                 </li>
               ))}

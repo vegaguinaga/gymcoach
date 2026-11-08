@@ -1,4 +1,5 @@
 // Generador de rutinas para principiantes. Lógica pura: recibe perfil y biblioteca, devuelve una Routine.
+import { esPorTiempo } from './medida'
 import type { DiaRutina, EjercicioPlanificado, Equipo, Exercise, Profile, Routine } from './tipos'
 
 export const MINUTOS_POR_SERIE = 2.5
@@ -29,8 +30,8 @@ const BICEPS_2 = ['curl_martillo', 'curl_mancuernas', 'curl_barra']
 const TRICEPS = ['extension_polea', 'press_frances', 'fondos_banco']
 const TRICEPS_2 = ['press_frances', 'extension_polea', 'fondos_banco']
 const GEMELOS = ['elevacion_gemelos']
-// La plancha se mide en segundos, por eso no entra en el generador (todo se prescribe en reps)
-const CORE = ['dead_bug', 'crunch', 'elevacion_piernas']
+// La plancha se mide en segundos (ver medida.ts): se prescribe en segundos en lugar de reps
+const CORE = ['plancha', 'dead_bug', 'crunch', 'elevacion_piernas']
 const CORE_2 = ['elevacion_piernas', 'crunch', 'dead_bug']
 
 interface Plantilla {
@@ -90,6 +91,9 @@ export function plantillasPara(diasPorSemana: number): { nombre: string; semana:
 
 /** Series, reps, RPE y descanso según el tipo de ejercicio. */
 export function prescripcion(ejercicio: Exercise, seriesAccesorio = 3): EjercicioPlanificado {
+  // Por tiempo: repsMin/repsMax son segundos
+  if (esPorTiempo(ejercicio.id))
+    return { ejercicioId: ejercicio.id, series: seriesAccesorio, repsMin: 20, repsMax: 45, rpe: 8, descansoSeg: 60 }
   return ejercicio.tipo === 'compuesto'
     ? { ejercicioId: ejercicio.id, series: 3, repsMin: 6, repsMax: 10, rpe: 7, descansoSeg: 150 }
     : { ejercicioId: ejercicio.id, series: seriesAccesorio, repsMin: 10, repsMax: 15, rpe: 8, descansoSeg: 75 }
@@ -193,9 +197,6 @@ export function generarRutina(perfil: Profile, ejercicios: Exercise[], ahora = n
 
 // --- Cambiar un ejercicio de la rutina (fase 5) ---
 
-/** Ejercicios que se miden en segundos: no entran en la rutina (todo se prescribe en reps). */
-export const NO_PRESCRIBIBLES = new Set(['plancha'])
-
 /**
  * Opciones para reemplazar un ejercicio del día: primero sus alternativas y después otros del mismo grupo
  * principal, siempre con el equipo del perfil y sin repetir uno que ya esté en el día.
@@ -214,7 +215,7 @@ export function opcionesDeCambio(
   ]
   const vistos = new Set<string>()
   return candidatos.filter((e) => {
-    if (vistos.has(e.id) || enDia.has(e.id) || NO_PRESCRIBIBLES.has(e.id) || !equipo.includes(e.equipo)) return false
+    if (vistos.has(e.id) || enDia.has(e.id) || !equipo.includes(e.equipo)) return false
     vistos.add(e.id)
     return true
   })

@@ -1,5 +1,6 @@
 // Edición de sesiones ya terminadas (corregir lo que se anotó mal).
 // Los récords, la progresión y el 1RM se recalculan solos porque se leen de las sesiones.
+import { MAX_SEGUNDOS, esPorTiempo } from './medida'
 import { claveDia } from './calendario'
 import type { SetLog, WorkoutSession } from './tipos'
 import { redondearKg } from './unidades'
@@ -7,10 +8,11 @@ import { redondearKg } from './unidades'
 export const MAX_KG = 500
 export const MAX_REPS = 100
 
-/** Ajusta una serie a valores válidos: kg 0–500 con 1 decimal, reps enteras 0–100, RPE 1–10 o sin RPE. */
+/** Ajusta una serie a valores válidos: kg 0–500 con 1 decimal, reps enteras 0–100 (por tiempo, segundos 0–600), RPE 1–10 o sin RPE. */
 export function normalizarSerie(s: SetLog): SetLog {
   const kg = Number.isFinite(s.kg) ? Math.min(MAX_KG, Math.max(0, redondearKg(s.kg))) : 0
-  const reps = Number.isFinite(s.reps) ? Math.min(MAX_REPS, Math.max(0, Math.round(s.reps))) : 0
+  const max = esPorTiempo(s.ejercicioId) ? MAX_SEGUNDOS : MAX_REPS
+  const reps = Number.isFinite(s.reps) ? Math.min(max, Math.max(0, Math.round(s.reps))) : 0
   const rpe = s.rpe !== undefined && Number.isFinite(s.rpe) ? Math.min(10, Math.max(1, Math.round(s.rpe))) : undefined
   const normal: SetLog = { ...s, kg, reps, rpe }
   if (rpe === undefined) delete normal.rpe

@@ -1,6 +1,7 @@
 // Progreso: historial por ejercicio, récords personales y resumen de constancia.
 // Solo cuentan las sesiones terminadas y las series completadas.
 import { mejor1RM, volumen } from './fuerza'
+import { esPorTiempo } from './medida'
 import type { SetLog, WorkoutSession } from './tipos'
 
 export interface PuntoEjercicio {
@@ -53,7 +54,11 @@ function mejorSerieDe(series: SetLog[]): SerieRecord | null {
   return mejor
 }
 
-export const textoSerie = (s: SerieRecord) => (s.kg > 0 ? `${s.kg} kg × ${s.reps}` : `${s.reps} reps`)
+/** "60 kg × 8", "12 reps"; por tiempo: "45 s" o "10 kg × 45 s". */
+export function textoSerie(s: SerieRecord, porTiempo = false): string {
+  if (porTiempo) return s.kg > 0 ? `${s.kg} kg × ${s.reps} s` : `${s.reps} s`
+  return s.kg > 0 ? `${s.kg} kg × ${s.reps}` : `${s.reps} reps`
+}
 
 /** Un punto por sesión terminada en la que se completó alguna serie del ejercicio, de la más antigua a la más reciente. */
 export function historialEjercicio(sesiones: WorkoutSession[], ejercicioId: string): PuntoEjercicio[] {
@@ -102,7 +107,7 @@ export function recordsNuevos(sesion: WorkoutSession, historial: WorkoutSession[
     if (rm !== null && previo.unoRM && rm > previo.unoRM.valor) nuevos.push({ ejercicioId: id, tipo: 'unoRM', texto: `${rm} kg` })
     const serie = mejorSerieDe(series)
     if (serie && previo.mejorSerie && serieMejor(serie, previo.mejorSerie))
-      nuevos.push({ ejercicioId: id, tipo: 'serie', texto: textoSerie(serie) })
+      nuevos.push({ ejercicioId: id, tipo: 'serie', texto: textoSerie(serie, esPorTiempo(id)) })
   }
   return nuevos
 }

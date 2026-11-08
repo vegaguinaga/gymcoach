@@ -12,6 +12,8 @@ import { OpcionesCambio } from '../../ui/OpcionesCambio'
 import { Pantalla } from '../../ui/Pantalla'
 import { prepararAviso } from './aviso'
 import { BarraDescanso } from './BarraDescanso'
+import { CronometroSerie } from './CronometroSerie'
+import { esPorTiempo, unidad } from '../../domain/medida'
 
 interface Props {
   sesion: WorkoutSession
@@ -132,6 +134,8 @@ function TarjetaEjercicio({
   const propias = series.map((s, indice) => ({ s, indice })).filter(({ s }) => s.ejercicioId === plan.ejercicioId)
   const hechas = propias.filter(({ s }) => s.completada).length
   const pesoCorporal = ejercicio?.equipo === 'peso_corporal'
+  const porTiempo = esPorTiempo(plan.ejercicioId)
+  const pendiente = propias.find(({ s }) => !s.completada)
   // Aproximación según el peso de la primera serie; solo antes de empezar el ejercicio
   const calentamiento = hechas === 0 ? seriesCalentamiento(propias[0]?.s.kg ?? 0, ejercicio) : []
 
@@ -140,11 +144,11 @@ function TarjetaEjercicio({
       series: actual.series.map((s, i) => (i === indice ? { ...s, ...cambios } : s)),
     }))
 
-  const alternarCompletada = (indice: number) =>
+  const alternarCompletada = (indice: number, cambios: Partial<SetLog> = {}) =>
     modificarSesion(id, (actual) => {
       const completada = !actual.series[indice]?.completada
       return {
-        series: actual.series.map((s, i) => (i === indice ? { ...s, completada } : s)),
+        series: actual.series.map((s, i) => (i === indice ? { ...s, ...cambios, completada } : s)),
         // Al marcar una serie arranca el descanso de este ejercicio; al desmarcarla, no
         ...(completada && { descansoHasta: finDescanso(plan.descansoSeg) }),
       }
@@ -158,7 +162,7 @@ function TarjetaEjercicio({
             {ejercicio?.nombre ?? plan.ejercicioId}
           </a>
           <p className="text-sm text-neutral-400">
-            Objetivo: {plan.series} × {plan.repsMin}–{plan.repsMax} reps · RPE {plan.rpe}
+            Objetivo: {plan.series} × {plan.repsMin}–{plan.repsMax} {unidad(plan.ejercicioId)} · RPE {plan.rpe}
           </p>
           {sugerencia && <p className={`mt-1 text-sm font-medium ${COLOR_SUGERENCIA[sugerencia.tipo]}`}>{sugerencia.texto}</p>}
           {notaAnterior && !nota && <p className="mt-1 text-sm text-neutral-400">📝 La última vez: {notaAnterior}</p>}
@@ -184,10 +188,19 @@ function TarjetaEjercicio({
         </details>
       )}
 
+      {porTiempo && pendiente && (
+        <CronometroSerie
+          key={pendiente.s.serie}
+          serie={pendiente.s.serie}
+          objetivo={pendiente.s.reps || plan.repsMin}
+          alParar={(segundos) => void alternarCompletada(pendiente.indice, { reps: segundos })}
+        />
+      )}
+
       <div className="grid grid-cols-[1.5rem_1fr_1fr_4.5rem_2.75rem] items-center gap-2 text-xs text-neutral-400">
         <span>#</span>
         <span>{pesoCorporal ? 'Lastre kg' : 'Kg'}</span>
-        <span>Reps</span>
+        <span>{porTiempo ? 'Seg' : 'Reps'}</span>
         <span>RPE</span>
         <span className="sr-only">Hecha</span>
       </div>
@@ -205,7 +218,7 @@ function TarjetaEjercicio({
               alCambiar={(kg) => cambiarSerie(indice, { kg: redondearKg(kg) })}
             />
             <CampoNumero
-              etiqueta={`Reps, serie ${s.serie}`}
+              etiqueta={`${porTiempo ? 'Segundos' : 'Reps'}, serie ${s.serie}`}
               valor={s.reps}
               alCambiar={(reps) => cambiarSerie(indice, { reps: Math.round(reps) })}
             />

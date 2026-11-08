@@ -85,10 +85,11 @@ describe('generarRutina', () => {
     }
   })
 
-  it('prescribe compuestos 3×6–10 y accesorios 10–15', () => {
+  it('prescribe compuestos 3×6–10, accesorios 10–15 y la plancha 20–45 s', () => {
     const r = generarRutina(perfil(), biblioteca)
     for (const e of r.dias.flatMap((d) => d.ejercicios)) {
-      if (porId.get(e.ejercicioId)?.tipo === 'compuesto') {
+      if (e.ejercicioId === 'plancha') expect([e.repsMin, e.repsMax, e.descansoSeg]).toEqual([20, 45, 60])
+      else if (porId.get(e.ejercicioId)?.tipo === 'compuesto') {
         expect([e.repsMin, e.repsMax, e.rpe]).toEqual([6, 10, 7])
         expect(e.descansoSeg).toBeGreaterThanOrEqual(120)
       } else {
@@ -161,7 +162,7 @@ describe('cambiar un ejercicio de la rutina', () => {
     const actual = porId.get(dia.ejercicios[1].ejercicioId)!
     const opciones = opcionesDeCambio(actual, dia, biblioteca, ['mancuernas', 'peso_corporal'])
     expect(opciones.length).toBeGreaterThan(0)
-    expect(opciones.every((e) => e.equipo !== 'gym' && e.id !== 'plancha')).toBe(true)
+    expect(opciones.every((e) => e.equipo !== 'gym')).toBe(true)
     expect(opciones.some((e) => dia.ejercicios.some((x) => x.ejercicioId === e.id))).toBe(false)
     expect(new Set(opciones.map((e) => e.id)).size).toBe(opciones.length)
     const primeraAlt = actual.alternativas.map((id) => porId.get(id)!).find((e) => opciones.includes(e))
