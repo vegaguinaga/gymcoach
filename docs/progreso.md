@@ -1,6 +1,12 @@
 # Progreso de GymCoach
 
-## Estado actual: Fase 5 completada (2026-11-08)
+## Estado actual: Fase 6 completada (2026-11-08)
+- **PWA** con `vite-plugin-pwa` (generateSW, `registerType: 'prompt'`): precache de todo (JS, incluido el chunk de Progreso, CSS, iconos y fotos; ~100 archivos, 1.8 MB). Manifest con `start_url: /#/entrenar`. Iconos generados (mancuerna lima) en `public/` (`pwa-192/512`, maskable, apple-touch-icon y favicon.svg). `src/ui/AvisoActualizacion.tsx` avisa de una versión nueva y no recarga sola, para no cortar una sesión.
+- **Cambiar un ejercicio en la sesión** (máquina ocupada): `cambiarEjercicioEnSesion` en `sesion.ts` (con tests). Solo afecta a la sesión de hoy: conserva las series hechas del original (queda su tarjeta con esas series) y el nuevo hace las que faltan, con su prescripción y su sugerencia de peso. En descarga no vuelve a dividir las series. UI: botón "⇄ Cambiar" en cada tarjeta. `OpcionesCambio` pasó a `src/ui/` (se usa en Rutina y en Entrenar).
+- **Copia de seguridad**: `src/domain/respaldo.ts` (formato v1, `validarRespaldo` con mensajes en español, con tests) y `src/data/repos/respaldo.ts` (exportar en una transacción; importar todo o nada, reemplaza y conserva los ids). Sección "Tus datos" en Perfil: antes de importar pide confirmación y descarga una copia de lo actual. La biblioteca no se exporta.
+- Dexie sigue en **v3**. Build: JS inicial ≈ 122 KB gzip.
+
+## Fase 5 (2026-11-08)
 - Dominio: `src/domain/progresion.ts` (con tests):
   - `sugerencia` aplica la doble progresión. **Sube** si llegaste al tope del rango en todas las series con RPE ≤ 8. **Mantiene** el peso y pide +1 rep si estás dentro del rango. **Baja** un 10 % si quedaste bajo el mínimo en más de la mitad de las series en 2 sesiones seguidas. Un ejercicio **nuevo** empieza en 0 kg con RPE 6. En peso corporal sin lastre se progresa en reps.
   - `incrementoKg`: 2 kg con mancuernas, 2.5 kg en compuestos y 1 kg en accesorios de gym.
@@ -56,9 +62,8 @@
 - Primer test de dominio: `redondearKg` (`src/domain/unidades.ts`).
 - Build: JS inicial ≈ 69 KB gzip.
 
-## Siguiente: Fase 6
-Por definir. Ideas: instalar vite-plugin-pwa (offline real), cambiar un ejercicio en medio de la sesión (máquina ocupada), exportar o importar datos.
-Pendiente: vite-plugin-pwa aún no está instalado (al hacerlo, incluir el chunk de Progreso en el precache).
+## Siguiente: Fase 7
+Por definir. Ideas: notas por sesión/ejercicio, calentamiento sugerido (series de aproximación), recordatorio para exportar la copia, probar la instalación en iOS/Android.
 
 ## Notas
 - Node se instaló con nvm: en shells no interactivos hay que cargar `~/.nvm/nvm.sh` antes de `npm`.
