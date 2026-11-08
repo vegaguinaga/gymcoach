@@ -1,6 +1,13 @@
 # Progreso de GymCoach
 
-## Estado actual: Fase 6 completada (2026-11-08)
+## Estado actual: Fase 7 completada (2026-11-08)
+- **Calentamiento**: `src/domain/calentamiento.ts` (con tests). Solo compuestos con carga: 40 % × 8, 60 % × 5 y 80 % × 3 del peso de la 1.ª serie, redondeado al incremento (`incrementoKg`). Con < 20 kg, 1 serie al 50 %. Desplegable «🔥 Calentamiento» en la tarjeta hasta marcar la primera serie; no se registra.
+- **Notas**: `WorkoutSession.notasEjercicio` (opcional, sin índice: Dexie sigue en **v3**). `src/domain/notas.ts` (`conNotaEjercicio`, `ultimaNota`, con tests). En la tarjeta: «📝 Añadir nota» y «La última vez: …». Nota de la sesión en el resumen (`guardarNotaSesion`, sirve también en sesiones terminadas). Se ven en el detalle del historial.
+- **Recordatorio de copia**: `Profile.ultimaCopia`, que se guarda al exportar y al importar. `guardarPerfil` la conserva (el formulario no la pisa). `necesitaCopia`/`textoUltimaCopia` en `respaldo.ts` (con tests): avisa si nunca hubo copia y hay ≥ 3 sesiones, o si la copia tiene 14+ días y hay sesiones posteriores. Aviso en el selector de día de Entrenar y «Última copia: …» en Tus datos.
+- **Instalación**: `src/ui/instalacion.ts` (`detectarPlataforma` con tests; `beforeinstallprompt` se escucha desde `main.tsx`). Tarjeta «📲 Instala la app» en Perfil: botón en Android/Chrome y pasos para iOS; se oculta si ya está instalada. Meta tags `apple-mobile-web-app-*` y manifest con `id`, `scope` y `categories`. **Falta probarla en un teléfono real.**
+- Build: JS inicial ≈ 124 KB gzip.
+
+## Fase 6 (2026-11-08)
 - **PWA** con `vite-plugin-pwa` (generateSW, `registerType: 'prompt'`): precache de todo (JS, incluido el chunk de Progreso, CSS, iconos y fotos; ~100 archivos, 1.8 MB). Manifest con `start_url: /#/entrenar`. Iconos generados (mancuerna lima) en `public/` (`pwa-192/512`, maskable, apple-touch-icon y favicon.svg). `src/ui/AvisoActualizacion.tsx` avisa de una versión nueva y no recarga sola, para no cortar una sesión.
 - **Cambiar un ejercicio en la sesión** (máquina ocupada): `cambiarEjercicioEnSesion` en `sesion.ts` (con tests). Solo afecta a la sesión de hoy: conserva las series hechas del original (queda su tarjeta con esas series) y el nuevo hace las que faltan, con su prescripción y su sugerencia de peso. En descarga no vuelve a dividir las series. UI: botón "⇄ Cambiar" en cada tarjeta. `OpcionesCambio` pasó a `src/ui/` (se usa en Rutina y en Entrenar).
 - **Copia de seguridad**: `src/domain/respaldo.ts` (formato v1, `validarRespaldo` con mensajes en español, con tests) y `src/data/repos/respaldo.ts` (exportar en una transacción; importar todo o nada, reemplaza y conserva los ids). Sección "Tus datos" en Perfil: antes de importar pide confirmación y descarga una copia de lo actual. La biblioteca no se exporta.
@@ -62,8 +69,8 @@
 - Primer test de dominio: `redondearKg` (`src/domain/unidades.ts`).
 - Build: JS inicial ≈ 69 KB gzip.
 
-## Siguiente: Fase 7
-Por definir. Ideas: notas por sesión/ejercicio, calentamiento sugerido (series de aproximación), recordatorio para exportar la copia, probar la instalación en iOS/Android.
+## Siguiente: Fase 8
+Por definir. Ideas: probar la instalación en iOS/Android y corregir lo que aparezca, editar sesiones ya terminadas, plantillas de rutina propias, vista del calendario de entrenamientos.
 
 ## Notas
 - Node se instaló con nvm: en shells no interactivos hay que cargar `~/.nvm/nvm.sh` antes de `npm`.
