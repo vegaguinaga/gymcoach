@@ -1,7 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks'
+import { normalizarSerie } from '../../domain/edicionSesion'
 import { normalizarNota } from '../../domain/notas'
 import { nuevaSesion } from '../../domain/sesion'
-import type { Routine, WorkoutSession } from '../../domain/tipos'
+import type { Routine, SetLog, WorkoutSession } from '../../domain/tipos'
 import { db } from '../db'
 
 /** Sesión en curso; null si no hay, undefined mientras carga. */
@@ -72,4 +73,12 @@ export function useSesion(id: number): WorkoutSession | null | undefined {
 /** Borra una sesión terminada del historial (el usuario lo confirma antes). */
 export async function borrarSesion(id: number): Promise<void> {
   await db.sesiones.delete(id)
+}
+
+/** Guarda las series corregidas de una sesión terminada (las de una sesión en curso van por `modificarSesion`). */
+export async function editarSesionTerminada(id: number, series: SetLog[]): Promise<void> {
+  await db.transaction('rw', db.sesiones, async () => {
+    const actual = await db.sesiones.get(id)
+    if (actual?.estado === 'terminada') await db.sesiones.update(id, { series: series.map(normalizarSerie) })
+  })
 }

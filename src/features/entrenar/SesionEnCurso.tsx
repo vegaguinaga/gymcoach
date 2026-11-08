@@ -7,6 +7,7 @@ import { opcionesDeCambio } from '../../domain/generador'
 import { agregarSerie, cambiarEjercicioEnSesion, finDescanso, quitarSerie } from '../../domain/sesion'
 import type { EjercicioPlanificado, Equipo, Exercise, SetLog, Sugerencia, TipoSugerencia, WorkoutSession } from '../../domain/tipos'
 import { AvisoSeguridad } from '../../ui/AvisoSeguridad'
+import { CampoNumero } from '../../ui/CampoNumero'
 import { OpcionesCambio } from '../../ui/OpcionesCambio'
 import { Pantalla } from '../../ui/Pantalla'
 import { prepararAviso } from './aviso'
@@ -331,49 +332,6 @@ function NotaEjercicio({
         if (e.target.value.trim() !== (nota ?? '')) alGuardar(e.target.value)
       }}
       className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 p-2 text-sm"
-    />
-  )
-}
-
-/**
- * Input numérico que guarda al salir del campo (así se puede escribir "22." sin que se borre).
- * Si el valor cambia desde fuera mientras no se edita, se actualiza.
- */
-function CampoNumero({
-  etiqueta,
-  valor,
-  decimales = false,
-  alCambiar,
-}: {
-  etiqueta: string
-  valor: number
-  decimales?: boolean
-  alCambiar: (n: number) => void
-}) {
-  const [texto, setTexto] = useState(String(valor))
-  const [editando, setEditando] = useState(false)
-  const mostrado = editando ? texto : String(valor)
-
-  function guardar() {
-    setEditando(false)
-    const n = Number(texto.replace(',', '.'))
-    if (texto.trim() !== '' && Number.isFinite(n) && n >= 0 && n !== valor) alCambiar(n)
-  }
-
-  return (
-    <input
-      aria-label={etiqueta}
-      inputMode={decimales ? 'decimal' : 'numeric'}
-      value={mostrado}
-      onFocus={(e) => {
-        setTexto(String(valor))
-        setEditando(true)
-        e.target.select()
-      }}
-      onChange={(e) => setTexto(e.target.value)}
-      onBlur={guardar}
-      onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-      className="min-h-11 w-full min-w-0 rounded-lg border border-neutral-700 bg-neutral-950 px-2 text-center text-lg"
     />
   )
 }
