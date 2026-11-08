@@ -3,10 +3,12 @@ import { useEjercicios } from '../../data/repos/ejercicios'
 import { usePerfil } from '../../data/repos/perfil'
 import { actualizarRutina, guardarRutina, useRutinaActual } from '../../data/repos/rutinas'
 import { cambiarEjercicio, diasEfectivos, generarRutina, minutosEstimados, opcionesDeCambio } from '../../domain/generador'
-import type { DiaRutina, EjercicioPlanificado, Equipo, Exercise } from '../../domain/tipos'
+import { renombrarRutina } from '../../domain/edicionRutina'
+import type { DiaRutina, EjercicioPlanificado, Equipo, Exercise, Routine } from '../../domain/tipos'
 import { AvisoSeguridad } from '../../ui/AvisoSeguridad'
 import { OpcionesCambio } from '../../ui/OpcionesCambio'
 import { Pantalla } from '../../ui/Pantalla'
+import { EditorDia } from './EditorDia'
 
 function textoDescanso(seg: number): string {
   return seg >= 60 && seg % 60 === 0 ? `${seg / 60} min` : seg > 60 ? `${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, '0')} min` : `${seg} s`
@@ -39,7 +41,10 @@ export function PantallaRutina() {
 
   async function generar() {
     if (!perfil || !ejercicios) return
-    if (rutina && !confirm('¿Generar una rutina nueva? La actual quedará guardada en el historial.')) return
+    const aviso = rutina?.personalizada
+      ? '¿Generar una rutina nueva? La nueva no tendrá los cambios que hiciste a mano (la actual quedará guardada en el historial).'
+      : '¿Generar una rutina nueva? La actual quedará guardada en el historial.'
+    if (rutina && !confirm(aviso)) return
     setGenerando(true)
     try {
       await guardarRutina(generarRutina(perfil, ejercicios))
@@ -56,9 +61,23 @@ export function PantallaRutina() {
       <div className="flex flex-col gap-4">
         {rutina ? (
           <div>
-            <p className="text-lg font-semibold">{rutina.nombre}</p>
+            <div className="flex items-center gap-2">
+              <p className="flex-1 text-lg font-semibold">{rutina.nombre}</p>
+              <button
+                type="button"
+                aria-label="Cambiar el nombre de la rutina"
+                onClick={() => {
+                  const nuevo = prompt('Nombre de la rutina', rutina.nombre)
+                  if (nuevo !== null) void actualizarRutina(renombrarRutina(rutina, nuevo))
+                }}
+                className="size-11 rounded-lg bg-neutral-800"
+              >
+                ✏️
+              </button>
+            </div>
             <p className="text-sm text-neutral-400">
               Creada el {new Date(rutina.creada).toLocaleDateString('es')}
+              {rutina.personalizada && ' · editada por ti'}
             </p>
           </div>
         ) : (
@@ -100,10 +119,11 @@ export function PantallaRutina() {
                 key={i}
                 numero={i + 1}
                 dia={dia}
+                rutina={rutina}
                 porId={porId}
                 ejercicios={ejercicios}
                 equipo={perfil.equipo}
-                alCambiar={(pos, nuevo) => actualizarRutina(cambiarEjercicio(rutina, i, pos, nuevo))}
+                alCambiar={(pos, nuevo) => actualizarRutina({ ...cambiarEjercicio(rutina, i, pos, nuevo), personalizada: true })}
               />
             ))}
           </>
@@ -116,15 +136,17 @@ export function PantallaRutina() {
 interface PropsDia {
   numero: number
   dia: DiaRutina
+  rutina: Routine
   porId: Map<string, Exercise>
   ejercicios: Exercise[]
   equipo: Equipo[]
   alCambiar: (posicion: number, nuevo: Exercise) => Promise<void>
 }
 
-function TarjetaDia({ numero, dia, porId, ejercicios, equipo, alCambiar }: PropsDia) {
+function TarjetaDia({ numero, dia, rutina, porId, ejercicios, equipo, alCambiar }: PropsDia) {
   // Posición del ejercicio cuyo selector de cambio está abierto
   const [cambiando, setCambiando] = useState<number | null>(null)
+  const [editando, setEditando] = useState(false)
   return (
     <section className="rounded-xl bg-neutral-900 p-4" aria-labelledby={`dia-${numero}`}>
       <header className="mb-2 flex items-baseline justify-between gap-2">
@@ -133,32 +155,56 @@ function TarjetaDia({ numero, dia, porId, ejercicios, equipo, alCambiar }: Props
         </h2>
         <span className="shrink-0 text-sm text-neutral-400">~{minutosEstimados(dia)} min</span>
       </header>
-      <ul className="divide-y divide-neutral-800">
-        {dia.ejercicios.map((e, pos) => {
-          const ejercicio = porId.get(e.ejercicioId)
-          const abierto = cambiando === pos
-          return (
-            <FilaEjercicio
-              key={e.ejercicioId}
-              plan={e}
-              ejercicio={ejercicio}
-              abierto={abierto}
-              alAlternar={() => setCambiando(abierto ? null : pos)}
-            >
-              {abierto && ejercicio && (
-                <OpcionesCambio
-                  titulo="Cambiar por (en todos los días iguales):"
-                  opciones={opcionesDeCambio(ejercicio, dia, ejercicios, equipo)}
-                  alElegir={async (nuevo) => {
-                    await alCambiar(pos, nuevo)
-                    setCambiando(null)
-                  }}
-                />
-              )}
-            </FilaEjercicio>
-          )
-        })}
-      </ul>
+      <button
+        type="button"
+        onClick={() => {
+          setEditando(!editando)
+          setCambiando(null)
+        }}
+        aria-expanded={editando}
+        className={`mb-2 min-h-11 w-full rounded-lg text-sm font-semibold ${
+          editando ? 'bg-lime-400 text-neutral-950' : 'bg-neutral-800 text-neutral-300'
+        }`}
+      >
+        {editando ? '✓ Listo' : '✏️ Editar día'}
+      </button>
+      {editando ? (
+        <EditorDia
+          rutina={rutina}
+          diaIndice={numero - 1}
+          porId={porId}
+          ejercicios={ejercicios}
+          equipo={equipo}
+          alGuardar={actualizarRutina}
+        />
+      ) : (
+        <ul className="divide-y divide-neutral-800">
+          {dia.ejercicios.map((e, pos) => {
+            const ejercicio = porId.get(e.ejercicioId)
+            const abierto = cambiando === pos
+            return (
+              <FilaEjercicio
+                key={e.ejercicioId}
+                plan={e}
+                ejercicio={ejercicio}
+                abierto={abierto}
+                alAlternar={() => setCambiando(abierto ? null : pos)}
+              >
+                {abierto && ejercicio && (
+                  <OpcionesCambio
+                    titulo="Cambiar por (en todos los días iguales):"
+                    opciones={opcionesDeCambio(ejercicio, dia, ejercicios, equipo)}
+                    alElegir={async (nuevo) => {
+                      await alCambiar(pos, nuevo)
+                      setCambiando(null)
+                    }}
+                  />
+                )}
+              </FilaEjercicio>
+            )
+          })}
+        </ul>
+      )}
       {!!dia.cardioMin && (
         <p className="mt-2 text-sm text-neutral-300">
           + {dia.cardioMin} min de cardio suave al final (bici, cinta inclinada o elíptica).

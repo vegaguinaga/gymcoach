@@ -208,7 +208,7 @@ export function seriesPorGrupo(rutina: Routine, ejercicios: Exercise[]): Record<
 // --- Cambiar un ejercicio de la rutina (fase 5) ---
 
 /** Ejercicios que se miden en segundos: no entran en la rutina (todo se prescribe en reps). */
-const NO_PRESCRIBIBLES = new Set(['plancha'])
+export const NO_PRESCRIBIBLES = new Set(['plancha'])
 
 /**
  * Opciones para reemplazar un ejercicio del día: primero sus alternativas y después otros del mismo grupo

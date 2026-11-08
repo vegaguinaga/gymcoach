@@ -81,6 +81,8 @@ export interface Routine {
   nombre: string
   creada: string
   dias: DiaRutina[]
+  /** true si el usuario la editó a mano (fase 8) */
+  personalizada?: boolean
 }
 
 export interface SetLog {
