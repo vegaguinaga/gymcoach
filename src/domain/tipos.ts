@@ -121,7 +121,10 @@ export interface WorkoutSession {
   series: SetLog[]
   /** Fin del descanso en curso (ISO); así el temporizador sobrevive a recargar la app */
   descansoHasta?: string
+  /** Nota general de la sesión */
   notas?: string
+  /** Nota por ejercicio (clave: ejercicioId), ej. "asiento en el 4" */
+  notasEjercicio?: Record<string, string>
   /** Sesión de una semana de descarga (no cuenta para la progresión) */
   descarga?: boolean
   /** Sugerencia por ejercicio (clave: ejercicioId) */

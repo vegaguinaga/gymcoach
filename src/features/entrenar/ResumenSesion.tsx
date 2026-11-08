@@ -1,4 +1,5 @@
-import { useSesionesTerminadas } from '../../data/repos/sesiones'
+import { guardarNotaSesion, useSesionesTerminadas } from '../../data/repos/sesiones'
+import { MAX_NOTA } from '../../domain/notas'
 import { recordsNuevos } from '../../domain/progreso'
 import { resumenSesion } from '../../domain/sesion'
 import type { Exercise, WorkoutSession } from '../../domain/tipos'
@@ -64,6 +65,18 @@ export function ResumenSesion({ sesion, ejercicios, alCerrar }: Props) {
             <p className="mt-2 text-xs text-neutral-500">Estimación con la fórmula de Epley; no hace falta probarlo.</p>
           </section>
         )}
+
+        <label className="flex flex-col gap-1 text-sm text-neutral-400">
+          Nota de la sesión (opcional)
+          <textarea
+            rows={2}
+            maxLength={MAX_NOTA}
+            defaultValue={sesion.notas ?? ''}
+            placeholder="¿Cómo te sentiste? Ej.: dormí poco, hombro cargado"
+            onBlur={(e) => sesion.id !== undefined && void guardarNotaSesion(sesion.id, e.target.value)}
+            className="rounded-lg border border-neutral-700 bg-neutral-950 p-2 text-base text-neutral-100"
+          />
+        </label>
 
         <button type="button" onClick={alCerrar} className="min-h-14 rounded-xl bg-lime-400 text-lg font-bold text-neutral-950">
           Listo

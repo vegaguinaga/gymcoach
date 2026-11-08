@@ -1,4 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
+import { normalizarNota } from '../../domain/notas'
 import { nuevaSesion } from '../../domain/sesion'
 import type { Routine, WorkoutSession } from '../../domain/tipos'
 import { db } from '../db'
@@ -42,6 +43,11 @@ export async function modificarSesion(
     const actual = await db.sesiones.get(id)
     if (actual?.estado === 'en_curso') await db.sesiones.update(id, cambio(actual))
   })
+}
+
+/** Guarda la nota general de una sesión (en curso o terminada). Vacía = sin nota. */
+export async function guardarNotaSesion(id: number, texto: string): Promise<void> {
+  await db.sesiones.update(id, { notas: normalizarNota(texto) || undefined })
 }
 
 export async function terminarSesion(id: number, fin = new Date().toISOString()): Promise<void> {

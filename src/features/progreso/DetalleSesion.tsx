@@ -40,6 +40,7 @@ export function DetalleSesion({ id, ejercicios }: { id: number; ejercicios: Map<
           {fechaLarga(sesion.fecha)}
           {min !== null && ` · ${min} min`} · {volumen(sesion.series).toLocaleString('es')} kg
         </p>
+        {sesion.notas && <p className="rounded-xl bg-neutral-900 p-3 text-sm text-neutral-300">📝 {sesion.notas}</p>}
 
         {records.length > 0 && (
           <section className="rounded-xl border border-lime-400/40 bg-neutral-900 p-4">
@@ -61,6 +62,7 @@ export function DetalleSesion({ id, ejercicios }: { id: number; ejercicios: Map<
         {ids.map((ejId) => (
           <section key={ejId} className="rounded-xl bg-neutral-900 p-4">
             <h2 className="mb-2 font-semibold">{nombre(ejId)}</h2>
+            {sesion.notasEjercicio?.[ejId] && <p className="mb-2 text-sm text-neutral-400">📝 {sesion.notasEjercicio[ejId]}</p>}
             <table className="w-full text-sm tabular-nums">
               <thead className="text-left text-xs text-neutral-500">
                 <tr>

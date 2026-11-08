@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { descartarSesion, modificarSesion, terminarSesion } from '../../data/repos/sesiones'
 import { redondearKg } from '../../domain/unidades'
 import { seriesCalentamiento } from '../../domain/calentamiento'
+import { conNotaEjercicio, MAX_NOTA, ultimaNota } from '../../domain/notas'
 import { opcionesDeCambio } from '../../domain/generador'
 import { agregarSerie, cambiarEjercicioEnSesion, finDescanso, quitarSerie } from '../../domain/sesion'
 import type { EjercicioPlanificado, Equipo, Exercise, SetLog, Sugerencia, TipoSugerencia, WorkoutSession } from '../../domain/tipos'
@@ -72,6 +73,8 @@ export function SesionEnCurso({ sesion, ejercicios, historial, equipo, alTermina
             ejercicio={ejercicios.get(plan.ejercicioId)}
             series={sesion.series}
             sugerencia={sesion.sugerencias?.[plan.ejercicioId]}
+            nota={sesion.notasEjercicio?.[plan.ejercicioId]}
+            notaAnterior={ultimaNota(plan.ejercicioId, historial)?.texto}
             cambiando={cambiando === plan.ejercicioId}
             alAlternarCambio={() => setCambiando(cambiando === plan.ejercicioId ? null : plan.ejercicioId)}
             opciones={opciones}
@@ -106,6 +109,8 @@ function TarjetaEjercicio({
   ejercicio,
   series,
   sugerencia,
+  nota,
+  notaAnterior,
   cambiando,
   alAlternarCambio,
   opciones,
@@ -116,6 +121,8 @@ function TarjetaEjercicio({
   ejercicio?: Exercise
   series: SetLog[]
   sugerencia?: Sugerencia
+  nota?: string
+  notaAnterior?: string
   cambiando: boolean
   alAlternarCambio: () => void
   opciones: (ejercicio: Exercise) => Exercise[]
@@ -153,6 +160,7 @@ function TarjetaEjercicio({
             Objetivo: {plan.series} × {plan.repsMin}–{plan.repsMax} reps · RPE {plan.rpe}
           </p>
           {sugerencia && <p className={`mt-1 text-sm font-medium ${COLOR_SUGERENCIA[sugerencia.tipo]}`}>{sugerencia.texto}</p>}
+          {notaAnterior && !nota && <p className="mt-1 text-sm text-neutral-400">📝 La última vez: {notaAnterior}</p>}
         </div>
         <span className={`shrink-0 text-sm ${hechas === propias.length ? 'text-lime-300' : 'text-neutral-400'}`}>
           {hechas}/{propias.length}
@@ -263,6 +271,13 @@ function TarjetaEjercicio({
           </button>
         )}
       </div>
+      <NotaEjercicio
+        nota={nota}
+        sugerida={notaAnterior}
+        alGuardar={(texto) =>
+          modificarSesion(id, (a) => ({ notasEjercicio: conNotaEjercicio(a.notasEjercicio, plan.ejercicioId, texto) }))
+        }
+      />
       {cambiando && ejercicio && (
         <div className="mt-2">
           <OpcionesCambio
@@ -279,6 +294,44 @@ function TarjetaEjercicio({
         </div>
       )}
     </section>
+  )
+}
+
+/** Nota del ejercicio en esta sesión (ej. "asiento en el 4"). Se guarda al salir del campo. */
+function NotaEjercicio({
+  nota,
+  sugerida,
+  alGuardar,
+}: {
+  nota?: string
+  sugerida?: string
+  alGuardar: (texto: string) => void
+}) {
+  const [abierta, setAbierta] = useState(false)
+  if (!abierta)
+    return (
+      <button
+        type="button"
+        onClick={() => setAbierta(true)}
+        className="mt-2 flex min-h-11 w-full items-center gap-2 rounded-lg px-1 text-left text-sm text-neutral-400 active:bg-neutral-800"
+      >
+        📝 {nota ? <span className="text-neutral-200">{nota}</span> : 'Añadir nota'}
+      </button>
+    )
+  return (
+    <textarea
+      aria-label="Nota del ejercicio"
+      autoFocus
+      rows={2}
+      maxLength={MAX_NOTA}
+      defaultValue={nota ?? sugerida ?? ''}
+      placeholder="Ej.: asiento en el 4, agarre ancho"
+      onBlur={(e) => {
+        setAbierta(false)
+        if (e.target.value.trim() !== (nota ?? '')) alGuardar(e.target.value)
+      }}
+      className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 p-2 text-sm"
+    />
   )
 }
 
