@@ -1,6 +1,13 @@
 # Progreso de GymCoach
 
-## Estado actual: Fase 8 completada (2026-11-08)
+## Estado actual: Fase 9 completada (2026-11-08) · v0.9.0
+- **Cambiar fecha**: `cambiarFecha` y `fechaLocal` en `edicionSesion.ts` (con tests). Conserva la hora y la duración y no acepta días futuros; si hoy quedaría en el futuro, termina ahora. «📅 Cambiar fecha» en el detalle del historial (`cambiarFechaSesion`).
+- **Sesión olvidada**: `sesionOlvidada` en `sesion.ts` (con tests). Queda terminada, sin `sugerencias`. Las series vienen con lo sugerido según el historial **anterior** a esa fecha y **sin marcar**. Duración 10–240 min y nunca termina después de ahora. «➕ Registrar sesión olvidada» en Historial (`SesionOlvidada.tsx`) pide día, fecha, hora y duración y después abre el detalle. Una sesión sin series hechas se abre directamente en modo edición.
+- **Días de la rutina**: `agregarDia` (copia de otro, al final, máximo 7; mantiene el nombre, así que cambia junto a su original) y `quitarDia` (queda al menos 1) en `edicionRutina.ts` (con tests). «Añadir un día» al final de Rutina y «Quitar este día» en el modo edición de cada día. `siguienteDia` va en ciclo, así que sigue funcionando.
+- **Mantenimiento**: `@types/node` 26. `npm audit`: 6 avisos (moderados/bajos) en `workbox-build` (dependencia de `vite-plugin-pwa`), que solo se usa al compilar y no llega a la app. El arreglo que propone baja a vite-plugin-pwa 1.1, así que no se aplicó. Se creó `CHANGELOG.md`.
+- Dexie sigue en **v3**. Build: JS inicial ≈ 127 KB gzip.
+
+## Fase 8 (2026-11-08)
 - **Editar sesiones terminadas**: `src/domain/edicionSesion.ts` (`normalizarSerie`, `editarSerie`, `hayCambios`; con tests). En el detalle del historial, «✏️ Editar series»: borrador local con kg/reps/RPE/✓, + serie y ×. Se guarda todo junto (`editarSesionTerminada`). Récords y progresión se recalculan solos. `CampoNumero` pasó a `src/ui/`.
 - **Calendario**: `src/domain/calendario.ts` (`mesCalendario` con semanas que empiezan en lunes y hora local, `rachaSemanas`; con tests). Chip «Calendario» en Progreso: mes con ◀ ▶, días entrenados en lima y, al tocar un día, sus sesiones. «🔥 N semanas seguidas»: la semana en curso no rompe la racha. La sección elegida se recuerda en `sessionStorage`.
 - **Rutinas propias**: `src/domain/edicionRutina.ts` (con tests). Se puede editar series 1–6, reps 1–30, RPE 5–10 y descanso 30–300 s (pasos de 15), reordenar ↑↓, quitar (queda al menos 1) y añadir ejercicios (no la plancha ni repetidos), renombrar el día y la rutina. **Los cambios de ejercicios se aplican a todos los días con el mismo nombre**; renombrar un día lo separa de los demás. No se añaden ni quitan días. `Routine.personalizada` (opcional): el aviso al regenerar lo menciona. UI: «✏️ Editar día» en cada tarjeta (`EditorDia.tsx`) y ✏️ junto al nombre.
@@ -75,8 +82,8 @@
 - Primer test de dominio: `redondearKg` (`src/domain/unidades.ts`).
 - Build: JS inicial ≈ 69 KB gzip.
 
-## Siguiente: Fase 9
-Por definir. Pendiente: probar la instalación y las pantallas nuevas en un teléfono real (iOS/Android). Ideas: añadir o quitar días en la rutina, editar la fecha de una sesión, registrar una sesión olvidada a posteriori.
+## Siguiente: Fase 10
+Por definir. Pendiente: probar la instalación y las pantallas nuevas en un teléfono real (iOS/Android). Hay código muerto por confirmar: `seriesPorGrupo` en `generador.ts` y los `.gitkeep` de carpetas que ya tienen archivos. Revisar `npm audit` cuando salga una versión nueva de vite-plugin-pwa/workbox.
 
 ## Notas
 - Node se instaló con nvm: en shells no interactivos hay que cargar `~/.nvm/nvm.sh` antes de `npm`.
