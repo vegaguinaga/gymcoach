@@ -2,7 +2,7 @@
 // REGLA: para cambiar el esquema, agrega un nuevo db.version(n+1) con su .upgrade();
 // nunca modifiques una versión existente ni borres datos del usuario.
 import { Dexie, type EntityTable } from 'dexie'
-import type { BodyMeasurement, BodyWeightEntry, Exercise, Profile, Routine, WorkoutSession } from '../domain/tipos'
+import type { BodyMeasurement, BodyWeightEntry, Exercise, GymPayment, Profile, Routine, WorkoutSession } from '../domain/tipos'
 
 export const db = new Dexie('gymcoach') as Dexie & {
   perfil: EntityTable<Profile, 'id'>
@@ -11,6 +11,7 @@ export const db = new Dexie('gymcoach') as Dexie & {
   rutinas: EntityTable<Routine, 'id'>
   sesiones: EntityTable<WorkoutSession, 'id'>
   medidas: EntityTable<BodyMeasurement, 'id'>
+  pagos: EntityTable<GymPayment, 'id'>
 }
 
 // Versión 1 (Fase 1): perfil, peso corporal y biblioteca de ejercicios
@@ -34,4 +35,9 @@ db.version(3).stores({
 // Versión 4 (Fase 10): medidas corporales (cm). Tabla nueva, sin datos que migrar.
 db.version(4).stores({
   medidas: '++id, fecha',
+})
+
+// Versión 5 (Fase 11): pagos de la mensualidad del gym. Tabla nueva, sin datos que migrar.
+db.version(5).stores({
+  pagos: '++id, fecha',
 })

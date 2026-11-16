@@ -89,8 +89,12 @@
 - Primer test de dominio: `redondearKg` (`src/domain/unidades.ts`).
 - Build: JS inicial ≈ 69 KB gzip.
 
-## Siguiente: Fase 11
-Por definir. Pendiente: probar la instalación y las pantallas nuevas en un teléfono real (iOS/Android), sobre todo el cronómetro de la plancha y el formulario de medidas. Revisar `npm audit` cuando salga una versión nueva de vite-plugin-pwa/workbox. Si se añaden más isométricos, solo hay que sumarlos a `EJERCICIOS_POR_TIEMPO` y a la biblioteca.
+## Fase 11 (en curso, 2026-11-16)
+- **Pago del gym**: `GymPayment { fecha, monto? }` y **Dexie v5** con la tabla `pagos` ('++id, fecha'). `src/domain/pagos.ts` (con tests): `vencimiento` = mismo día del mes siguiente (31 ene → 28/29 feb), `estadoPago` (último pago, vencimiento y días que faltan; negativo = vencido), `fechaDePago` (no acepta fechas futuras) y `leerMonto`. El vencimiento cuenta desde la fecha del pago, no desde el vencimiento anterior. `repos/pagos.ts`. Tarjeta «💳 Pago del gym» en Perfil (`PagoGym.tsx`: «Pagué hoy» u otra fecha, monto opcional, borrar el último) y `AvisoPago` en el selector de día de Entrenar a ≤ 3 días o vencido. Copia de seguridad **v3** con `pagos`; v1 y v2 se importan con pagos vacíos.
+- 183 tests.
+
+## Siguiente
+Pendiente: probar la instalación y las pantallas nuevas en un teléfono real (iOS/Android), sobre todo el cronómetro de la plancha y el formulario de medidas. Revisar `npm audit` cuando salga una versión nueva de vite-plugin-pwa/workbox. Si se añaden más isométricos, solo hay que sumarlos a `EJERCICIOS_POR_TIEMPO` y a la biblioteca.
 
 ## Notas
 - **Publicada en https://vegaguinaga.github.io/gymcoach/** (GitHub Pages, repo público). `.github/workflows/deploy.yml` corre los tests y el build con `BASE_PATH=/gymcoach/` en cada push a `main` y despliega. En local la base sigue siendo `/`.

@@ -22,6 +22,7 @@ const datos: DatosUsuario = {
     },
   ],
   medidas: [{ id: 4, fecha: '2026-01-03T10:00:00Z', cm: { cintura: 85 } }],
+  pagos: [{ id: 5, fecha: '2026-01-04T12:00:00Z', monto: 30 }],
 }
 const ahora = new Date('2026-11-08T12:00:00Z')
 // Simula guardar el archivo y volver a leerlo
@@ -42,7 +43,7 @@ describe('respaldo', () => {
   })
 
   it('acepta un respaldo vacío (app recién instalada)', () => {
-    const v = validarRespaldo(idaYVuelta(crearRespaldo({ perfil: [], pesosCorporales: [], rutinas: [], sesiones: [], medidas: [] })))
+    const v = validarRespaldo(idaYVuelta(crearRespaldo({ perfil: [], pesosCorporales: [], rutinas: [], sesiones: [], medidas: [], pagos: [] })))
     expect(v.ok).toBe(true)
   })
 
@@ -74,8 +75,8 @@ describe('respaldo', () => {
 
   it('resume lo que trae (solo sesiones terminadas)', () => {
     const conEnCurso = { ...datos, sesiones: [...datos.sesiones, { ...datos.sesiones[0], id: 4, estado: 'en_curso' as const }] }
-    expect(resumenRespaldo(conEnCurso)).toBe('1 sesión, 1 rutina, 1 registro de peso y 1 registro de medidas')
-    expect(resumenRespaldo({ ...datos, rutinas: [], sesiones: [], medidas: [] })).toBe('0 sesiones, 0 rutinas y 1 registro de peso')
+    expect(resumenRespaldo(conEnCurso)).toBe('1 sesión, 1 rutina, 1 registro de peso, 1 registro de medidas y 1 pago del gym')
+    expect(resumenRespaldo({ ...datos, rutinas: [], sesiones: [], medidas: [], pagos: [] })).toBe('0 sesiones, 0 rutinas y 1 registro de peso')
   })
 
   it('acepta copias v1 (sin medidas) y las deja con medidas vacías', () => {
@@ -90,6 +91,20 @@ describe('respaldo', () => {
     expect(validarRespaldo(idaYVuelta(sinMedidas))).toEqual({ ok: false, error: 'Falta la sección de medidas.' })
     const mala = { ...crearRespaldo(datos), medidas: [{ fecha: '2026-01-01', cm: { oreja: 5 } }] }
     expect(validarRespaldo(idaYVuelta(mala))).toEqual({ ok: false, error: 'Hay un dato dañado en medidas (n.º 1).' })
+  })
+
+  it('acepta copias v2 (sin pagos) y las deja con pagos vacíos', () => {
+    const { pagos: _, ...sinPagos } = crearRespaldo(datos)
+    const v = validarRespaldo({ ...idaYVuelta(sinPagos) as object, version: 2 })
+    expect(v.ok && v.respaldo.pagos).toEqual([])
+    expect(v.ok && v.respaldo.medidas).toHaveLength(1)
+  })
+
+  it('en v3 los pagos son obligatorios y se validan', () => {
+    const { pagos: _, ...sinPagos } = crearRespaldo(datos)
+    expect(validarRespaldo(idaYVuelta(sinPagos))).toEqual({ ok: false, error: 'Falta la sección de pagos del gym.' })
+    const mala = { ...crearRespaldo(datos), pagos: [{ fecha: '2026-01-01', monto: 'mucho' }] }
+    expect(validarRespaldo(idaYVuelta(mala))).toEqual({ ok: false, error: 'Hay un dato dañado en pagos del gym (n.º 1).' })
   })
 })
 

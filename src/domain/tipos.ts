@@ -145,3 +145,11 @@ export interface WorkoutSession {
   /** Sugerencia por ejercicio (clave: ejercicioId) */
   sugerencias?: Record<string, Sugerencia>
 }
+
+/** Pago de la mensualidad del gym. Cubre un mes desde `fecha`. */
+export interface GymPayment {
+  id?: number
+  fecha: string
+  /** Lo que se pagó (opcional, sin moneda) */
+  monto?: number
+}

@@ -2,7 +2,7 @@
 import { crearRespaldo, nombreArchivo, type Respaldo } from '../../domain/respaldo'
 import { db } from '../db'
 
-const TABLAS = () => [db.perfil, db.pesosCorporales, db.rutinas, db.sesiones, db.medidas]
+const TABLAS = () => [db.perfil, db.pesosCorporales, db.rutinas, db.sesiones, db.medidas, db.pagos]
 
 /** Lee todas las tablas del usuario en una sola transacción (una foto consistente). */
 export async function exportarDatos(ahora = new Date()): Promise<Respaldo> {
@@ -14,6 +14,7 @@ export async function exportarDatos(ahora = new Date()): Promise<Respaldo> {
         rutinas: await db.rutinas.toArray(),
         sesiones: await db.sesiones.toArray(),
         medidas: await db.medidas.toArray(),
+        pagos: await db.pagos.toArray(),
       },
       ahora,
     ),
@@ -52,6 +53,7 @@ export async function importarDatos(respaldo: Respaldo): Promise<void> {
     await db.rutinas.bulkPut(respaldo.rutinas)
     await db.sesiones.bulkPut(respaldo.sesiones)
     await db.medidas.bulkPut(respaldo.medidas)
+    await db.pagos.bulkPut(respaldo.pagos)
   })
   // Los datos actuales son ahora los de un archivo que el usuario ya tiene guardado
   await marcarCopia()

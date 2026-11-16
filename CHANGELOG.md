@@ -2,6 +2,12 @@
 
 Formato: fecha, Agregado / Cambiado / Corregido. Versiones con [semver](https://semver.org/lang/es/); 0.x = fase de desarrollo.
 
+## [Sin publicar]
+### Agregado
+- Pago del gym en Perfil: registras el pago (hoy u otra fecha, monto opcional) y ves cuándo vence y cuántos días faltan. Aviso en Entrenar 3 días antes o si ya venció.
+### Cambiado
+- Copia de seguridad v3: incluye los pagos. Las copias v1 y v2 se siguen pudiendo importar.
+
 ## [0.10.0] - 2026-11-08
 ### Agregado
 - Volumen semanal por grupo muscular: en Rutina (planificado, con aviso si queda corto o alto) y en Progreso (hecho esta semana frente a lo planificado).

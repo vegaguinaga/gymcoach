@@ -1,10 +1,10 @@
 // Copia de seguridad: exportar/importar todos los datos del usuario en un JSON. Lógica pura.
 import { MEDIDAS } from './tipos'
-import type { BodyMeasurement, BodyWeightEntry, Profile, Routine, WorkoutSession } from './tipos'
+import type { BodyMeasurement, BodyWeightEntry, GymPayment, Profile, Routine, WorkoutSession } from './tipos'
 
 /** Versión del formato del archivo. Si cambia, `validarRespaldo` debe seguir aceptando las anteriores. */
-// v1: perfil, peso, rutinas y sesiones · v2 (fase 10): + medidas corporales
-export const VERSION_RESPALDO = 2
+// v1: perfil, peso, rutinas y sesiones · v2 (fase 10): + medidas corporales · v3 (fase 11): + pagos del gym
+export const VERSION_RESPALDO = 3
 
 export interface DatosUsuario {
   perfil: Profile[]
@@ -12,6 +12,7 @@ export interface DatosUsuario {
   rutinas: Routine[]
   sesiones: WorkoutSession[]
   medidas: BodyMeasurement[]
+  pagos: GymPayment[]
 }
 
 /** La biblioteca de ejercicios no se incluye: es la base de la app y se vuelve a copiar al iniciar. */
@@ -42,6 +43,7 @@ const esPeso = (v: unknown) => esObjeto(v) && esIdOpcional(v.id) && esTexto(v.fe
 const esMedida = (v: unknown) =>
   esObjeto(v) && esIdOpcional(v.id) && esTexto(v.fecha) && esObjeto(v.cm) &&
   Object.entries(v.cm).every(([k, n]) => (MEDIDAS as readonly string[]).includes(k) && esNumero(n))
+const esPago = (v: unknown) => esObjeto(v) && esIdOpcional(v.id) && esTexto(v.fecha) && (v.monto === undefined || esNumero(v.monto))
 const esRutina = (v: unknown) => esObjeto(v) && esIdOpcional(v.id) && esTexto(v.creada) && Array.isArray(v.dias)
 const esSerie = (v: unknown) =>
   esObjeto(v) && esTexto(v.ejercicioId) && esNumero(v.kg) && esNumero(v.reps) && typeof v.completada === 'boolean'
@@ -61,6 +63,7 @@ const TABLAS: { clave: keyof DatosUsuario; nombre: string; valido: (v: unknown) 
   { clave: 'rutinas', nombre: 'rutinas', valido: esRutina },
   { clave: 'sesiones', nombre: 'sesiones', valido: esSesion },
   { clave: 'medidas', nombre: 'medidas', valido: esMedida, desdeVersion: 2 },
+  { clave: 'pagos', nombre: 'pagos del gym', valido: esPago, desdeVersion: 3 },
 ]
 
 /** Comprueba que un JSON (ya parseado) sea un respaldo de GymCoach que esta versión sabe leer. */
@@ -87,6 +90,7 @@ export function resumenRespaldo(r: DatosUsuario): string {
   const n = (c: number, uno: string, varios: string) => `${c} ${c === 1 ? uno : varios}`
   const partes = [n(terminadas, 'sesión', 'sesiones'), n(r.rutinas.length, 'rutina', 'rutinas'), n(r.pesosCorporales.length, 'registro de peso', 'registros de peso')]
   if (r.medidas.length > 0) partes.push(n(r.medidas.length, 'registro de medidas', 'registros de medidas'))
+  if (r.pagos.length > 0) partes.push(n(r.pagos.length, 'pago del gym', 'pagos del gym'))
   return `${partes.slice(0, -1).join(', ')} y ${partes.at(-1)}`
 }
 

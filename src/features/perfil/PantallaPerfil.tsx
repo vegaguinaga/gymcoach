@@ -7,6 +7,7 @@ import { AvisoSeguridad } from '../../ui/AvisoSeguridad'
 import { Chip } from '../../ui/Chip'
 import { Pantalla } from '../../ui/Pantalla'
 import { InstalarApp } from './InstalarApp'
+import { PagoGym } from './PagoGym'
 import { TusDatos } from './TusDatos'
 
 const OPCIONES_MINUTOS = [30, 45, 60, 75, 90]
@@ -24,6 +25,7 @@ export function PantallaPerfil() {
           <FormularioPerfil inicial={perfil ?? perfilPorDefecto()} nuevo={!perfil} />
         )}
         <PesoCorporal />
+        <PagoGym />
         <a
           href="#/ejercicios"
           className="flex min-h-14 items-center justify-between rounded-xl bg-neutral-900 px-4 font-semibold"

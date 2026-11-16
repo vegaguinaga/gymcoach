@@ -9,6 +9,7 @@ import { necesitaCopia } from '../../domain/respaldo'
 import { siguienteDia } from '../../domain/sesion'
 import type { Exercise, Routine, WorkoutSession } from '../../domain/tipos'
 import { Pantalla } from '../../ui/Pantalla'
+import { AvisoPago } from '../perfil/PagoGym'
 import { ResumenSesion } from './ResumenSesion'
 import { SesionEnCurso } from './SesionEnCurso'
 
@@ -95,6 +96,7 @@ function SelectorDia({ rutina, sugerido, descarga, ejercicios, avisoCopia }: Pro
 
   return (
     <Pantalla titulo="Entrenar">
+      <AvisoPago />
       {avisoCopia && (
         <a
           href="#/perfil"
