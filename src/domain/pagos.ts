@@ -1,5 +1,5 @@
-// Mensualidad del gym: cuándo vence el último pago y cuántos días faltan. Lógica pura.
-import type { GymPayment } from './tipos'
+// Pago del gym (semanal, quincenal o mensual): cuándo vence el último y cuántos días faltan. Lógica pura.
+import type { GymPayment, PeriodoPago } from './tipos'
 
 /** A partir de estos días (o menos) antes del vencimiento se avisa en Entrenar. */
 export const DIAS_AVISO_PAGO = 3
@@ -8,8 +8,14 @@ export const MAX_MONTO = 10_000_000
 const DIA_MS = 86_400_000
 const diaUTC = (d: Date) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())
 
-/** Mismo día del mes siguiente (hora local). Si ese día no existe, el último del mes: 31 ene → 28/29 feb. */
-export function vencimiento(fecha: Date): Date {
+export const ETIQUETA_PERIODO: Record<PeriodoPago, string> = { semana: 'Semana', quincena: 'Quincena', mes: 'Mes' }
+
+/**
+ * Fin del periodo pagado (hora local). Semana = +7 días, quincena = +15 días.
+ * Mes = mismo día del mes siguiente; si ese día no existe, el último del mes: 31 ene → 28/29 feb.
+ */
+export function vencimiento(fecha: Date, periodo: PeriodoPago = 'mes'): Date {
+  if (periodo !== 'mes') return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate() + (periodo === 'semana' ? 7 : 15))
   const ultimoDelMes = new Date(fecha.getFullYear(), fecha.getMonth() + 2, 0).getDate()
   return new Date(fecha.getFullYear(), fecha.getMonth() + 1, Math.min(fecha.getDate(), ultimoDelMes))
 }
@@ -25,7 +31,7 @@ export interface EstadoPago {
 export function estadoPago(pagos: GymPayment[], ahora = new Date()): EstadoPago | null {
   const ultimo = pagos.reduce<GymPayment | null>((a, p) => (!a || p.fecha > a.fecha ? p : a), null)
   if (!ultimo) return null
-  const vence = vencimiento(new Date(ultimo.fecha))
+  const vence = vencimiento(new Date(ultimo.fecha), ultimo.periodo)
   return { ultimo, vence, dias: Math.round((diaUTC(vence) - diaUTC(ahora)) / DIA_MS) }
 }
 

@@ -1,4 +1,5 @@
 // Reglas de una sesión de entrenamiento en vivo. Lógica pura: sin React ni Dexie.
+import { claveDia } from './calendario'
 import { mejor1RM, volumen } from './fuerza'
 import { prescripcion } from './generador'
 import { sugerencia } from './progresion'
@@ -8,6 +9,11 @@ import type { DiaRutina, EjercicioPlanificado, Exercise, Routine, SetLog, Sugere
 export function siguienteDia(rutina: Routine, ultima?: WorkoutSession | null): number {
   if (!ultima || ultima.rutinaId !== rutina.id || ultima.diaIndice === undefined) return 0
   return (ultima.diaIndice + 1) % rutina.dias.length
+}
+
+/** Etiqueta del día sugerido: si ya entrenaste hoy (día local), el siguiente toca mañana. */
+export function etiquetaSugerido(ultima: WorkoutSession | null | undefined, ahora = new Date()): string {
+  return ultima && claveDia(new Date(ultima.fecha)) === claveDia(ahora) ? 'Toca mañana' : 'Toca hoy'
 }
 
 /** Series completadas de la última sesión terminada en la que se hizo ese ejercicio. */

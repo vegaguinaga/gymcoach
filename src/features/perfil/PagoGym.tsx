@@ -1,20 +1,26 @@
 import { useState, type FormEvent } from 'react'
 import { claveDia } from '../../domain/calendario'
 import { borrarPago, registrarPago, usePagos } from '../../data/repos/pagos'
-import { DIAS_AVISO_PAGO, estadoPago, fechaDePago, leerMonto, MAX_MONTO, textoDias } from '../../domain/pagos'
+import { DIAS_AVISO_PAGO, estadoPago, ETIQUETA_PERIODO, fechaDePago, leerMonto, MAX_MONTO, textoDias } from '../../domain/pagos'
+import { PERIODOS_PAGO, type PeriodoPago } from '../../domain/tipos'
+import { Chip } from '../../ui/Chip'
 
+const CON_ARTICULO: Record<PeriodoPago, string> = { semana: 'la semana', quincena: 'la quincena', mes: 'el mes' }
 const fechaLarga = (d: Date) => d.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })
 
-/** Tarjeta de Perfil: registrar el pago del mes y ver cuándo vence. */
+/** Tarjeta de Perfil: registrar el pago (semana, quincena o mes) y ver cuándo vence. */
 export function PagoGym() {
   const pagos = usePagos()
   // Se fija al montar (la pantalla no queda abierta de un día para otro)
   const [hoy] = useState(() => claveDia(new Date()))
   const [fecha, setFecha] = useState(hoy)
   const [monto, setMonto] = useState('')
+  // null = el mismo periodo que el último pago (o mes si no hay ninguno)
+  const [elegido, setElegido] = useState<PeriodoPago | null>(null)
   const [mensaje, setMensaje] = useState<string | null>(null)
   if (pagos === undefined) return null
   const estado = estadoPago(pagos)
+  const periodo = elegido ?? estado?.ultimo.periodo ?? 'mes'
 
   async function enviar(e: FormEvent) {
     e.preventDefault()
@@ -22,7 +28,7 @@ export function PagoGym() {
     const m = leerMonto(monto)
     if (!d) return setMensaje('Elige una fecha que no sea futura')
     if (m === undefined) return setMensaje(`Escribe un monto entre 0 y ${MAX_MONTO.toLocaleString('es')}, o déjalo vacío`)
-    await registrarPago(d, m)
+    await registrarPago(d, periodo, m)
     setMonto('')
     setMensaje('✓ Pago registrado')
   }
@@ -43,7 +49,7 @@ export function PagoGym() {
       {estado ? (
         <div className="text-sm text-neutral-300">
           <p>
-            Pagaste el {fechaLarga(new Date(estado.ultimo.fecha))}
+            Pagaste {CON_ARTICULO[estado.ultimo.periodo ?? 'mes']} el {fechaLarga(new Date(estado.ultimo.fecha))}
             {estado.ultimo.monto !== undefined && ` (${estado.ultimo.monto.toLocaleString('es')})`}.
           </p>
           <p>
@@ -54,6 +60,16 @@ export function PagoGym() {
       ) : (
         <p className="text-sm text-neutral-400">Registra tu pago y te diremos cuándo vence.</p>
       )}
+      <fieldset>
+        <legend className="mb-1 text-sm text-neutral-400">¿Qué pagaste?</legend>
+        <div className="grid grid-cols-3 gap-2">
+          {PERIODOS_PAGO.map((p) => (
+            <Chip key={p} activo={periodo === p} onClick={() => setElegido(p)}>
+              {ETIQUETA_PERIODO[p]}
+            </Chip>
+          ))}
+        </div>
+      </fieldset>
       <div className="flex gap-2">
         <label className="flex flex-1 flex-col gap-1">
           <span className="text-sm text-neutral-400">Fecha del pago</span>

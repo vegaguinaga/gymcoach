@@ -6,7 +6,7 @@ import { empezarSesion, useSesionEnCurso, useSesionesTerminadas, useUltimaSesion
 import { minutosEstimados } from '../../domain/generador'
 import { estadoDescarga, type EstadoDescarga } from '../../domain/progresion'
 import { necesitaCopia } from '../../domain/respaldo'
-import { siguienteDia } from '../../domain/sesion'
+import { etiquetaSugerido, siguienteDia } from '../../domain/sesion'
 import type { Exercise, Routine, WorkoutSession } from '../../domain/tipos'
 import { Pantalla } from '../../ui/Pantalla'
 import { AvisoPago } from '../perfil/PagoGym'
@@ -63,6 +63,7 @@ export function PantallaEntrenar() {
     <SelectorDia
       rutina={rutina}
       sugerido={siguienteDia(rutina, ultima)}
+      etiqueta={etiquetaSugerido(ultima)}
       descarga={estadoDescarga(historial, compuestos)}
       ejercicios={nombres}
       avisoCopia={necesitaCopia(perfil?.ultimaCopia, historial)}
@@ -73,13 +74,15 @@ export function PantallaEntrenar() {
 interface PropsSelector {
   rutina: Routine
   sugerido: number
+  /** «Toca hoy» o «Toca mañana» */
+  etiqueta: string
   descarga: EstadoDescarga
   ejercicios: Map<string, Exercise>
   /** Hay entrenamientos sin copia de seguridad */
   avisoCopia: boolean
 }
 
-function SelectorDia({ rutina, sugerido, descarga, ejercicios, avisoCopia }: PropsSelector) {
+function SelectorDia({ rutina, sugerido, etiqueta, descarga, ejercicios, avisoCopia }: PropsSelector) {
   const [elegido, setElegido] = useState(sugerido)
   const [empezando, setEmpezando] = useState(false)
   const hayAviso = descarga.activa || descarga.recomendada
@@ -130,7 +133,7 @@ function SelectorDia({ rutina, sugerido, descarga, ejercicios, avisoCopia }: Pro
               </span>
             </span>
             {i === sugerido && (
-              <span className="rounded-full bg-lime-400 px-2 py-0.5 text-xs font-bold text-neutral-950">Toca hoy</span>
+              <span className="rounded-full bg-lime-400 px-2 py-0.5 text-xs font-bold text-neutral-950">{etiqueta}</span>
             )}
           </label>
         ))}

@@ -3,6 +3,7 @@ import { mejor1RM, unoRMEpley, volumen } from '../fuerza'
 import {
   agregarSerie,
   cambiarEjercicioEnSesion,
+  etiquetaSugerido,
   finDescanso,
   nuevaSesion,
   quitarSerie,
@@ -40,6 +41,16 @@ describe('fuerza', () => {
     expect(volumen(s)).toBe(800)
     expect(mejor1RM(s)).toBe(70) // 60 × (1 + 5/30) = 70 > 50 × 1.333 = 66.7
     expect(mejor1RM([])).toBeNull()
+  })
+})
+
+describe('etiquetaSugerido', () => {
+  const ses = (fecha: Date) => ({ fecha: fecha.toISOString(), estado: 'terminada', diaNombre: 'A', ejercicios: [], series: [] }) as WorkoutSession
+  it('dice «Toca mañana» si ya entrenaste hoy (día local) y «Toca hoy» si no', () => {
+    const ahora = new Date(2026, 10, 17, 20)
+    expect(etiquetaSugerido(ses(new Date(2026, 10, 17, 7)), ahora)).toBe('Toca mañana')
+    expect(etiquetaSugerido(ses(new Date(2026, 10, 16, 23)), ahora)).toBe('Toca hoy')
+    expect(etiquetaSugerido(null, ahora)).toBe('Toca hoy')
   })
 })
 

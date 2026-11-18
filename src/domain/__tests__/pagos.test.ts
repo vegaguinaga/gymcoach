@@ -13,6 +13,11 @@ describe('vencimiento', () => {
     expect(vencimiento(local(2028, 1, 30))).toEqual(local(2028, 2, 29, 0))
     expect(vencimiento(local(2026, 3, 31))).toEqual(local(2026, 4, 30, 0))
   })
+  it('semana suma 7 días y quincena 15, cruzando meses', () => {
+    expect(vencimiento(local(2026, 11, 17), 'semana')).toEqual(local(2026, 11, 24, 0))
+    expect(vencimiento(local(2026, 11, 17), 'quincena')).toEqual(local(2026, 12, 2, 0))
+    expect(vencimiento(local(2026, 12, 28), 'semana')).toEqual(local(2027, 1, 4, 0))
+  })
 })
 
 describe('estadoPago', () => {
@@ -25,6 +30,10 @@ describe('estadoPago', () => {
     expect(e?.dias).toBe(4)
     expect(estadoPago(pagos, local(2026, 11, 20, 1))?.dias).toBe(0)
     expect(estadoPago(pagos, local(2026, 11, 25))?.dias).toBe(-5)
+  })
+  it('usa el periodo del último pago (sin periodo = mes)', () => {
+    const pagos = [{ fecha: local(2026, 11, 1).toISOString() }, { fecha: local(2026, 11, 17).toISOString(), periodo: 'quincena' as const }]
+    expect(estadoPago(pagos, local(2026, 11, 17))?.dias).toBe(15)
   })
 })
 

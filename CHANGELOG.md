@@ -5,8 +5,11 @@ Formato: fecha, Agregado / Cambiado / Corregido. Versiones con [semver](https://
 ## [Sin publicar]
 ### Agregado
 - Pago del gym en Perfil: registras el pago (hoy u otra fecha, monto opcional) y ves cuándo vence y cuántos días faltan. Aviso en Entrenar 3 días antes o si ya venció.
+- El pago puede ser por semana, quincena o mes.
 ### Cambiado
 - Copia de seguridad v3: incluye los pagos. Las copias v1 y v2 se siguen pudiendo importar.
+### Corregido
+- Después de entrenar, el día siguiente ya no dice «Toca hoy», sino «Toca mañana».
 
 ## [0.10.0] - 2026-11-08
 ### Agregado

@@ -91,7 +91,9 @@
 
 ## Fase 11 (en curso, 2026-11-16)
 - **Pago del gym**: `GymPayment { fecha, monto? }` y **Dexie v5** con la tabla `pagos` ('++id, fecha'). `src/domain/pagos.ts` (con tests): `vencimiento` = mismo día del mes siguiente (31 ene → 28/29 feb), `estadoPago` (último pago, vencimiento y días que faltan; negativo = vencido), `fechaDePago` (no acepta fechas futuras) y `leerMonto`. El vencimiento cuenta desde la fecha del pago, no desde el vencimiento anterior. `repos/pagos.ts`. Tarjeta «💳 Pago del gym» en Perfil (`PagoGym.tsx`: «Pagué hoy» u otra fecha, monto opcional, borrar el último) y `AvisoPago` en el selector de día de Entrenar a ≤ 3 días o vencido. Copia de seguridad **v3** con `pagos`; v1 y v2 se importan con pagos vacíos.
-- 183 tests.
+- **Periodo del pago** (2026-11-17): `GymPayment.periodo` opcional (`semana` | `quincena` | `mes`; sin valor = mes, así los pagos anteriores siguen igual; no es índice, Dexie sigue en **v5**). Semana = +7 días y quincena = +15 días (no el 1 y el 16 de cada mes). En la tarjeta se elige con chips y por defecto queda el periodo del último pago. El respaldo valida el periodo.
+- **«Toca mañana»**: `etiquetaSugerido` en `sesion.ts` (con test). Si la última sesión terminada empezó hoy (día local), el día sugerido en Entrenar dice «Toca mañana» en vez de «Toca hoy». No mira los días de descanso.
+- 186 tests.
 
 ## Siguiente
 Pendiente: probar la instalación y las pantallas nuevas en un teléfono real (iOS/Android), sobre todo el cronómetro de la plancha y el formulario de medidas. Revisar `npm audit` cuando salga una versión nueva de vite-plugin-pwa/workbox. Si se añaden más isométricos, solo hay que sumarlos a `EJERCICIOS_POR_TIEMPO` y a la biblioteca.

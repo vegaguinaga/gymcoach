@@ -146,10 +146,15 @@ export interface WorkoutSession {
   sugerencias?: Record<string, Sugerencia>
 }
 
-/** Pago de la mensualidad del gym. Cubre un mes desde `fecha`. */
+export const PERIODOS_PAGO = ['semana', 'quincena', 'mes'] as const
+export type PeriodoPago = (typeof PERIODOS_PAGO)[number]
+
+/** Pago del gym. Cubre un periodo desde `fecha`. */
 export interface GymPayment {
   id?: number
   fecha: string
+  /** Sin valor = 'mes' (los pagos registrados antes de existir el campo eran mensuales) */
+  periodo?: PeriodoPago
   /** Lo que se pagó (opcional, sin moneda) */
   monto?: number
 }

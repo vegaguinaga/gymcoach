@@ -1,5 +1,5 @@
 // Copia de seguridad: exportar/importar todos los datos del usuario en un JSON. Lógica pura.
-import { MEDIDAS } from './tipos'
+import { MEDIDAS, PERIODOS_PAGO } from './tipos'
 import type { BodyMeasurement, BodyWeightEntry, GymPayment, Profile, Routine, WorkoutSession } from './tipos'
 
 /** Versión del formato del archivo. Si cambia, `validarRespaldo` debe seguir aceptando las anteriores. */
@@ -43,7 +43,9 @@ const esPeso = (v: unknown) => esObjeto(v) && esIdOpcional(v.id) && esTexto(v.fe
 const esMedida = (v: unknown) =>
   esObjeto(v) && esIdOpcional(v.id) && esTexto(v.fecha) && esObjeto(v.cm) &&
   Object.entries(v.cm).every(([k, n]) => (MEDIDAS as readonly string[]).includes(k) && esNumero(n))
-const esPago = (v: unknown) => esObjeto(v) && esIdOpcional(v.id) && esTexto(v.fecha) && (v.monto === undefined || esNumero(v.monto))
+const esPago = (v: unknown) =>
+  esObjeto(v) && esIdOpcional(v.id) && esTexto(v.fecha) && (v.monto === undefined || esNumero(v.monto)) &&
+  (v.periodo === undefined || (PERIODOS_PAGO as readonly unknown[]).includes(v.periodo))
 const esRutina = (v: unknown) => esObjeto(v) && esIdOpcional(v.id) && esTexto(v.creada) && Array.isArray(v.dias)
 const esSerie = (v: unknown) =>
   esObjeto(v) && esTexto(v.ejercicioId) && esNumero(v.kg) && esNumero(v.reps) && typeof v.completada === 'boolean'

@@ -22,7 +22,7 @@ const datos: DatosUsuario = {
     },
   ],
   medidas: [{ id: 4, fecha: '2026-01-03T10:00:00Z', cm: { cintura: 85 } }],
-  pagos: [{ id: 5, fecha: '2026-01-04T12:00:00Z', monto: 30 }],
+  pagos: [{ id: 5, fecha: '2026-01-04T12:00:00Z', monto: 30, periodo: 'quincena' }],
 }
 const ahora = new Date('2026-11-08T12:00:00Z')
 // Simula guardar el archivo y volver a leerlo
@@ -105,6 +105,8 @@ describe('respaldo', () => {
     expect(validarRespaldo(idaYVuelta(sinPagos))).toEqual({ ok: false, error: 'Falta la sección de pagos del gym.' })
     const mala = { ...crearRespaldo(datos), pagos: [{ fecha: '2026-01-01', monto: 'mucho' }] }
     expect(validarRespaldo(idaYVuelta(mala))).toEqual({ ok: false, error: 'Hay un dato dañado en pagos del gym (n.º 1).' })
+    const periodoMalo = { ...crearRespaldo(datos), pagos: [{ fecha: '2026-01-01', periodo: 'año' }] }
+    expect(validarRespaldo(idaYVuelta(periodoMalo)).ok).toBe(false)
   })
 })
 
