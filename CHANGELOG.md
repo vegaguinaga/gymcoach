@@ -2,7 +2,7 @@
 
 Formato: fecha, Agregado / Cambiado / Corregido. Versiones con [semver](https://semver.org/lang/es/); 0.x = fase de desarrollo.
 
-## [Sin publicar]
+## [0.11.0] - 2026-11-17
 ### Agregado
 - Pago del gym en Perfil: registras el pago (hoy u otra fecha, monto opcional) y ves cuándo vence y cuántos días faltan. Aviso en Entrenar 3 días antes o si ya venció.
 - El pago puede ser por semana, quincena o mes.

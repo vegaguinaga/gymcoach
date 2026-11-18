@@ -1,6 +1,12 @@
 # Progreso de GymCoach
 
-## Estado actual: Fase 10 completada (2026-11-08) · v0.10.0
+## Estado actual: Fase 11 completada (2026-11-17) · v0.11.0
+- **Pago del gym**: `GymPayment { fecha, monto? }` y **Dexie v5** con la tabla `pagos` ('++id, fecha'). `src/domain/pagos.ts` (con tests): `vencimiento` = mismo día del mes siguiente (31 ene → 28/29 feb), `estadoPago` (último pago, vencimiento y días que faltan; negativo = vencido), `fechaDePago` (no acepta fechas futuras) y `leerMonto`. El vencimiento cuenta desde la fecha del pago, no desde el vencimiento anterior. `repos/pagos.ts`. Tarjeta «💳 Pago del gym» en Perfil (`PagoGym.tsx`: «Pagué hoy» u otra fecha, monto opcional, borrar el último) y `AvisoPago` en el selector de día de Entrenar a ≤ 3 días o vencido. Copia de seguridad **v3** con `pagos`; v1 y v2 se importan con pagos vacíos.
+- **Periodo del pago** (2026-11-17): `GymPayment.periodo` opcional (`semana` | `quincena` | `mes`; sin valor = mes, así los pagos anteriores siguen igual; no es índice, Dexie sigue en **v5**). Semana = +7 días y quincena = +15 días (no el 1 y el 16 de cada mes). En la tarjeta se elige con chips y por defecto queda el periodo del último pago. El respaldo valida el periodo.
+- **«Toca mañana»**: `etiquetaSugerido` en `sesion.ts` (con test). Si la última sesión terminada empezó hoy (día local), el día sugerido en Entrenar dice «Toca mañana» en vez de «Toca hoy». No mira los días de descanso.
+- Dexie **v5**. 186 tests. Workflow con acciones actualizadas (checkout/setup-node v7, upload-pages-artifact/deploy-pages v5).
+
+## Fase 10 (2026-11-08) · v0.10.0
 - **Limpieza**: fuera los `.gitkeep` sobrantes. `seriesPorGrupo` se movió a `src/domain/volumen.ts`, donde ahora sí se usa.
 - **Volumen semanal**: `volumen.ts` (`seriesPorGrupo`, `seriesHechasSemana` desde el lunes, `volumenSemanal`, `rangoSemanal`; con tests). El grupo principal cuenta 1 serie y cada secundario 0.5. Rango: 10–16 en grupos grandes y 6–16 en bíceps, tríceps, gemelos y core. `src/ui/VolumenSemanal.tsx`: desplegable «📊 Volumen semanal» en Rutina (con estado y consejo) y chip «Volumen» en Progreso (hecho frente a planificado).
 - **Por tiempo**: `src/domain/medida.ts` (`EJERCICIOS_POR_TIEMPO` = plancha; reemplaza a `NO_PRESCRIBIBLES`). En estos ejercicios **`reps` guarda segundos** (SetLog, repsMin/repsMax, sugerencias), así que no hubo cambio de esquema. Prescripción 3 × 20–45 s RPE 8 con 60 s de descanso; el editor va de 10 a 180 s en pasos de 5; al editar una sesión se aceptan hasta 600 s. Progresión: +5 s; con lastre al tope sube kg. No cuenta para el 1RM ni para el volumen; el récord es el mayor tiempo. La plancha es la 1.ª opción de `CORE`. UI: `CronometroSerie.tsx` (▶, avisa al llegar al objetivo y ⏹ guarda y marca la serie), columnas «Seg» y gráfica «Mejor tiempo».
@@ -89,14 +95,8 @@
 - Primer test de dominio: `redondearKg` (`src/domain/unidades.ts`).
 - Build: JS inicial ≈ 69 KB gzip.
 
-## Fase 11 (en curso, 2026-11-16)
-- **Pago del gym**: `GymPayment { fecha, monto? }` y **Dexie v5** con la tabla `pagos` ('++id, fecha'). `src/domain/pagos.ts` (con tests): `vencimiento` = mismo día del mes siguiente (31 ene → 28/29 feb), `estadoPago` (último pago, vencimiento y días que faltan; negativo = vencido), `fechaDePago` (no acepta fechas futuras) y `leerMonto`. El vencimiento cuenta desde la fecha del pago, no desde el vencimiento anterior. `repos/pagos.ts`. Tarjeta «💳 Pago del gym» en Perfil (`PagoGym.tsx`: «Pagué hoy» u otra fecha, monto opcional, borrar el último) y `AvisoPago` en el selector de día de Entrenar a ≤ 3 días o vencido. Copia de seguridad **v3** con `pagos`; v1 y v2 se importan con pagos vacíos.
-- **Periodo del pago** (2026-11-17): `GymPayment.periodo` opcional (`semana` | `quincena` | `mes`; sin valor = mes, así los pagos anteriores siguen igual; no es índice, Dexie sigue en **v5**). Semana = +7 días y quincena = +15 días (no el 1 y el 16 de cada mes). En la tarjeta se elige con chips y por defecto queda el periodo del último pago. El respaldo valida el periodo.
-- **«Toca mañana»**: `etiquetaSugerido` en `sesion.ts` (con test). Si la última sesión terminada empezó hoy (día local), el día sugerido en Entrenar dice «Toca mañana» en vez de «Toca hoy». No mira los días de descanso.
-- 186 tests.
-
-## Siguiente
-Pendiente: probar la instalación y las pantallas nuevas en un teléfono real (iOS/Android), sobre todo el cronómetro de la plancha y el formulario de medidas. Revisar `npm audit` cuando salga una versión nueva de vite-plugin-pwa/workbox. Si se añaden más isométricos, solo hay que sumarlos a `EJERCICIOS_POR_TIEMPO` y a la biblioteca.
+## Siguiente: Fase 12
+Por definir. El pago del gym y «Toca mañana» ya se probaron en un teléfono Android. Pendiente: probar la instalación y las pantallas nuevas en un teléfono real (iOS/Android), sobre todo el cronómetro de la plancha y el formulario de medidas. Revisar `npm audit` cuando salga una versión nueva de vite-plugin-pwa/workbox. Si se añaden más isométricos, solo hay que sumarlos a `EJERCICIOS_POR_TIEMPO` y a la biblioteca.
 
 ## Notas
 - **Publicada en https://vegaguinaga.github.io/gymcoach/** (GitHub Pages, repo público). `.github/workflows/deploy.yml` corre los tests y el build con `BASE_PATH=/gymcoach/` en cada push a `main` y despliega. En local la base sigue siendo `/`.
